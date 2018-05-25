@@ -1,0 +1,59 @@
+{
+  "project_info": {
+    "project_number": "925450354522",
+    "firebase_url": "https://caribengkel-aca0a.firebaseio.com",
+    "project_id": "caribengkel-aca0a",
+    "storage_bucket": "caribengkel-aca0a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:925450354522:android:e72a29fb429640f6",
+        "android_client_info": {
+          "package_name": "id.assel.caribengkel"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "925450354522-e997thtlkstm2n3nt7pca4htb7gdohgf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "id.assel.caribengkel",
+            "certificate_hash": "a1628ed27d45e1314648c9efd6d50c196c57ad48"
+          }
+        },
+        {
+          "client_id": "925450354522-7frdh9ko717uuq7k5lfndc82nib2d4et.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "925450354522-7frdh9ko717uuq7k5lfndc82nib2d4et.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMu_KKlgrPLmLsNFWbQSe0FfHDQBuCf-I"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "925450354522-7frdh9ko717uuq7k5lfndc82nib2d4et.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
