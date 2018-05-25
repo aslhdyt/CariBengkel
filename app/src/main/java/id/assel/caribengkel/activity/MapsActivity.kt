@@ -1,4 +1,4 @@
-package id.assel.caribengkel
+package id.assel.caribengkel.activity
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -11,6 +11,8 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.mikepenz.materialdrawer.DrawerBuilder
+import id.assel.caribengkel.BuildConfig
+import id.assel.caribengkel.R
 import kotlinx.android.synthetic.main.activity_maps.*
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -29,6 +31,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         button.setOnClickListener {
             Toast.makeText(this, "TODO", Toast.LENGTH_SHORT).show()
+            //todo cari random
         }
 
         DrawerBuilder().withActivity(this).build()
