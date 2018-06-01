@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">CariBengkel</string>
+    <string name="app_name">Cari Bengkel</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_login">Sign in</string>
 
@@ -15,4 +15,6 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="drawer_item_home">Home</string>
+    <string name="drawer_item_settings">Settings</string>
 </resources>
