@@ -1,18 +1,22 @@
 package id.assel.caribengkel.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.Toast;
 
+import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
@@ -21,6 +25,7 @@ import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
 import id.assel.caribengkel.R;
+import id.assel.caribengkel.activity.auth.SplashActivity;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -36,24 +41,43 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_item_home);
-        SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName(R.string.drawer_item_settings);
+        final PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_item_home);
+        final SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName(R.string.drawer_item_settings);
+        final SecondaryDrawerItem item3 = new SecondaryDrawerItem().withName(R.string.drawer_item_signout);
 
         new DrawerBuilder().withActivity(this).withTranslucentStatusBar(false).withDisplayBelowStatusBar(true)
-                .withToolbar(toolbar).withActionBarDrawerToggle(true)
-                .addDrawerItems(
-                    item1,
-                    new DividerDrawerItem(),
-                    item2,
-                    new SecondaryDrawerItem().withName(R.string.drawer_item_settings))
-                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-                    @Override
-                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        Toast.makeText(MainActivity.this, "position: "+position+"\ndrawerItem: "+drawerItem.toString(), Toast.LENGTH_SHORT).show();
-                        return false;
+            .withToolbar(toolbar).withActionBarDrawerToggle(true)
+            .addDrawerItems(
+                item1,
+                new DividerDrawerItem(),
+                item2,
+                item3)
+            .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                @Override
+                public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                    if (drawerItem == item1) {
+                        System.out.println("item1 clicked");
+                    } else  if (drawerItem == item2) {
+                        System.out.println("item2 clicked");
+                    } else if (drawerItem == item3) {
+                        AuthUI.getInstance()
+                            .signOut(MainActivity.this)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    Intent intent = new Intent(MainActivity.this, SplashActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            });
+                    } else {
+                        System.out.println("item not registered");
                     }
-                })
-                .build();
+
+
+                    return false;
+                }
+            })
+            .build();
 
     }
 
