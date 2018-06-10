@@ -41,10 +41,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
+        //drawer item
         final PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_item_home);
         final SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName(R.string.drawer_item_settings);
         final SecondaryDrawerItem item3 = new SecondaryDrawerItem().withName(R.string.drawer_item_signout);
 
+        //drawer body
         new DrawerBuilder().withActivity(this).withTranslucentStatusBar(false).withDisplayBelowStatusBar(true)
             .withToolbar(toolbar).withActionBarDrawerToggle(true)
             .addDrawerItems(

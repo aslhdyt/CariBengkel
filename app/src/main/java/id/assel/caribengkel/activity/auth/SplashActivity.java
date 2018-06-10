@@ -12,12 +12,19 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Arrays;
-import java.util.List;
 
+import id.assel.caribengkel.R;
 import id.assel.caribengkel.activity.MainActivity;
 
 public class SplashActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 123;
+    private final Intent authUI = AuthUI.getInstance()
+            .createSignInIntentBuilder()
+            .setLogo(R.drawable.toolbox)      // Set logo drawable
+            .setAvailableProviders(Arrays.asList(
+                    new AuthUI.IdpConfig.EmailBuilder().build(),
+                    new AuthUI.IdpConfig.GoogleBuilder().build()
+            )).build();
 
 
     @Override
@@ -31,21 +38,7 @@ public class SplashActivity extends AppCompatActivity {
             startActivity(i);
             finish();
         } else {
-//            Intent i = new Intent(this, LoginActivity.class);
-//            startActivity(i);
-//            finish();
-
-            List<AuthUI.IdpConfig> providers = Arrays.asList(
-                    new AuthUI.IdpConfig.EmailBuilder().build(),
-                    new AuthUI.IdpConfig.GoogleBuilder().build()
-                    );
-
-            startActivityForResult(
-                    AuthUI.getInstance()
-                            .createSignInIntentBuilder()
-                            .setAvailableProviders(providers)
-                            .build(),
-                    RC_SIGN_IN);
+            startActivityForResult(authUI, RC_SIGN_IN);
         }
     }
 
@@ -65,18 +58,12 @@ public class SplashActivity extends AppCompatActivity {
                     finish();
                 }
             } else {
-                Toast.makeText(this, "sign in failed\nresponse:"+response, Toast.LENGTH_SHORT).show();
-                List<AuthUI.IdpConfig> providers = Arrays.asList(
-                        new AuthUI.IdpConfig.EmailBuilder().build(),
-                        new AuthUI.IdpConfig.GoogleBuilder().build()
-                );
-
-                startActivityForResult(
-                        AuthUI.getInstance()
-                                .createSignInIntentBuilder()
-                                .setAvailableProviders(providers)
-                                .build(),
-                        RC_SIGN_IN);
+                if (response != null) {
+                    Toast.makeText(this, "sign in failed\nresponse:"+response, Toast.LENGTH_SHORT).show();
+                    startActivityForResult(authUI, RC_SIGN_IN);
+                } else {
+                    finish();
+                }
                 // Sign in failed. If response is null the user canceled the
                 // sign-in flow using the back button. Otherwise check
                 // response.getError().getErrorCode() and handle the error.
