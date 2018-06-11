@@ -87,8 +87,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .withProfileImagesClickable(false)
                 .build();
         final PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_item_home);
-        final SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName(R.string.drawer_item_settings);
-        final SecondaryDrawerItem item3 = new SecondaryDrawerItem().withName(R.string.drawer_item_signout);
+        final PrimaryDrawerItem item2 = new PrimaryDrawerItem().withIdentifier(2).withName("Profile");
+        final PrimaryDrawerItem item3= new PrimaryDrawerItem().withIdentifier(3).withName("Order History");
+        final SecondaryDrawerItem item4 = new SecondaryDrawerItem().withIdentifier(2).withName("Bantuan");
+        final SecondaryDrawerItem item5 = new SecondaryDrawerItem().withName(R.string.drawer_item_signout);
 
         //drawer body
         new DrawerBuilder().withActivity(this).withTranslucentStatusBar(false).withDisplayBelowStatusBar(true)
@@ -96,9 +98,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .withAccountHeader(header)
             .addDrawerItems(
                 item1,
-                new DividerDrawerItem(),
                 item2,
-                item3)
+                item3,
+                new DividerDrawerItem(),
+                item4,
+                item5)
             .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                 @Override
                 public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
@@ -106,7 +110,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         System.out.println("item1 clicked");
                     } else  if (drawerItem == item2) {
                         System.out.println("item2 clicked");
-                    } else if (drawerItem == item3) {
+                    } else  if (drawerItem == item3) {
+                        System.out.println("item3 clicked");
+                    } else  if (drawerItem == item4) {
+                        System.out.println("item4 clicked");
+                    } else if (drawerItem == item5) {
                         AuthUI.getInstance()
                             .signOut(MainActivity.this)
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
