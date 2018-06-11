@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import id.assel.caribengkel.R;
-import id.assel.caribengkel.activity.MainActivity;
+import id.assel.caribengkel.activity.main.MainActivity;
 import id.assel.caribengkel.activity.mechanic.MechanicActivity;
 
 public class SplashActivity extends AppCompatActivity implements SignInInterface {
@@ -41,7 +41,8 @@ public class SplashActivity extends AppCompatActivity implements SignInInterface
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        Debug.debugSetLocation(this);
+//        only for populate data to firestore
+//        id.assel.caribengkel.debug.Debug.debugSetLocation(this);
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
         final FirebaseUser user = auth.getCurrentUser();

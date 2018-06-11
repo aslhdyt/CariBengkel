@@ -1,4 +1,4 @@
-package id.assel.caribengkel.debug;
+package id.assel.caribengkel.tools;
 
 import android.app.Activity;
 
@@ -7,8 +7,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+
+import id.assel.caribengkel.model.Workshop;
 
 public class Debug {
 
@@ -41,9 +42,10 @@ public class Debug {
         for(GeoPoint point : points) {
             final int finalI = i;
 
-            HashMap<String, GeoPoint> map = new HashMap<>();
-            map.put("LatLng", point);
-            FR.document("workshop/"+i).set(map).addOnSuccessListener(activity, new OnSuccessListener<Void>() {
+            Workshop data = new Workshop();
+            data.setLatLng(point);
+            data.setName("Bengkel "+finalI);
+            FR.document("workshop/"+i).set(data).addOnSuccessListener(activity, new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
                     System.out.println("added workshop "+ finalI);
