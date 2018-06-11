@@ -41,6 +41,8 @@ public class SplashActivity extends AppCompatActivity implements SignInInterface
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+//        Debug.debugSetLocation(this);
+
         FirebaseAuth auth = FirebaseAuth.getInstance();
         final FirebaseUser user = auth.getCurrentUser();
         if (user != null) {
@@ -75,6 +77,8 @@ public class SplashActivity extends AppCompatActivity implements SignInInterface
             startActivityForResult(authUI, RC_SIGN_IN);
         }
     }
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

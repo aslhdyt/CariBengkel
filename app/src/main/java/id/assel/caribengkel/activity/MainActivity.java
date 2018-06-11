@@ -98,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     finish();
                                 }
                             });
+
                     } else {
                         System.out.println("item not registered");
                     }
