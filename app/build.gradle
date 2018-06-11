@@ -1,9 +1,5 @@
 apply plugin: 'com.android.application'
 
-apply plugin: 'kotlin-android'
-
-apply plugin: 'kotlin-android-extensions'
-
 android {
     compileSdkVersion 27
     defaultConfig {
@@ -26,7 +22,6 @@ ext.supportLib = '27.1.1'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
@@ -44,11 +39,13 @@ dependencies {
     implementation "com.android.support:design:$supportLib"
 
     //ui
-    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.1'
+    implementation 'com.squareup.picasso:picasso:2.71828'
 
     //firebase
     implementation 'com.google.firebase:firebase-auth:16.0.1'
     implementation 'com.firebaseui:firebase-ui-auth:3.3.1'
+    implementation 'com.google.firebase:firebase-firestore:17.0.1'
 
     //google services
     implementation 'com.google.android.gms:play-services-auth:15.0.1'

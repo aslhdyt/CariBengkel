@@ -17,10 +17,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
@@ -28,6 +33,8 @@ import id.assel.caribengkel.R;
 import id.assel.caribengkel.activity.auth.SplashActivity;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+
+
 
 
     @Override
@@ -42,7 +49,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setSupportActionBar(toolbar);
 
 
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user == null) {
+            Intent intent = new Intent(MainActivity.this, SplashActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
         //drawer item
+        System.out.println("photoUrl: "+user.getPhotoUrl());
+        final AccountHeader header = new AccountHeaderBuilder()
+                .withActivity(this)
+                .addProfiles(
+                        new ProfileDrawerItem().withName(user.getDisplayName()).withEmail(user.getEmail()).withIcon(user.getPhotoUrl()))
+                .withCompactStyle(true)
+                .withSelectionListEnabledForSingleProfile(false)
+                .withTextColor(getResources().getColor(R.color.md_black_1000))
+                .withProfileImagesClickable(false)
+                .build();
         final PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_item_home);
         final SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName(R.string.drawer_item_settings);
         final SecondaryDrawerItem item3 = new SecondaryDrawerItem().withName(R.string.drawer_item_signout);
@@ -50,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //drawer body
         new DrawerBuilder().withActivity(this).withTranslucentStatusBar(false).withDisplayBelowStatusBar(true)
             .withToolbar(toolbar).withActionBarDrawerToggle(true)
+                .withAccountHeader(header)
             .addDrawerItems(
                 item1,
                 new DividerDrawerItem(),
