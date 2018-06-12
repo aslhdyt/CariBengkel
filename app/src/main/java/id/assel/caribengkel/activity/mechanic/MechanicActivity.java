@@ -13,6 +13,7 @@ import com.google.android.gms.tasks.Task;
 
 import id.assel.caribengkel.R;
 import id.assel.caribengkel.activity.auth.SplashActivity;
+import id.assel.caribengkel.tools.LoginPref;
 
 public class MechanicActivity extends AppCompatActivity {
 
@@ -23,16 +24,11 @@ public class MechanicActivity extends AppCompatActivity {
         findViewById(R.id.buttonSignOut).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AuthUI.getInstance()
-                    .signOut(MechanicActivity.this)
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            Intent intent = new Intent(MechanicActivity.this, SplashActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
-                    });
+                LoginPref.clearAll(view.getContext());
+
+                Intent intent = new Intent(MechanicActivity.this, SplashActivity.class);
+                startActivity(intent);
+                finish();
             }
         });
     }

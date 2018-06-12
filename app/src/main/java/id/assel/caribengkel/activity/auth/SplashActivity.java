@@ -1,9 +1,11 @@
 package id.assel.caribengkel.activity.auth;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
@@ -21,6 +23,8 @@ import java.util.Map;
 
 import id.assel.caribengkel.R;
 import id.assel.caribengkel.activity.main.MainActivity;
+import id.assel.caribengkel.activity.mechanic.MechanicActivity;
+import id.assel.caribengkel.tools.LoginPref;
 
 public class SplashActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 123;
@@ -34,19 +38,79 @@ public class SplashActivity extends AppCompatActivity {
 
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
 //        only for populate data to firestore
 //        id.assel.caribengkel.debug.Debug.debugSetLocation(this);
 
+        //todo create mechanic and user dialog
+
+        roleCheck();
+    }
+
+
+    private void roleCheck() {
+
+        String role = LoginPref.getAuthRole(this);
+
+        if (role == null) { //role not yet set
+            final int[] roleCode = {0};
+            final AlertDialog dialog = new AlertDialog.Builder(SplashActivity.this)
+                    .setCancelable(true)
+                    .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                        @Override
+                        public void onCancel(DialogInterface dialogInterface) {
+                            finish();
+                        }
+                    })
+                    .setSingleChoiceItems(new String[]{"Pengguna", "Mekanik"}, 0, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            if (i == 0) {
+                                roleCode[0] = i;
+                            } else if (i == 1) {
+                                roleCode[0] = i;
+                            } else {
+                                throw new NullPointerException();
+                            }
+                        }
+                    }).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            if (roleCode[0] == 0)
+                                userSignIn();
+                            else if (roleCode[0] == 1) {
+                                LoginPref.setAuthRole(SplashActivity.this, LoginPref.ROLE_MECHANIC);
+                                roleCheck();
+                            }
+                            else throw new NullPointerException("null role");
+                        }
+                    }).create();
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
+
+        } else {
+            if (role.equals(LoginPref.ROLE_USER)) { //regular user role
+                userSignIn();
+            } else {
+                //TODO for mechanic
+                Intent i = new Intent(this, MechanicActivity.class);
+                startActivity(i);
+                finish();
+            }
+        }
+    }
+
+    void userSignIn() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         final FirebaseUser user = auth.getCurrentUser();
         if (user != null) {
-            Intent i = new Intent(this, MainActivity.class);
+            LoginPref.setAuthRole(SplashActivity.this, LoginPref.ROLE_USER);
+            Intent i = new Intent(SplashActivity.this, MainActivity.class);
             startActivity(i);
             finish();
-        } else {
+        } else { //mechanic role
             startActivityForResult(authUI, RC_SIGN_IN);
         }
     }
@@ -81,10 +145,7 @@ public class SplashActivity extends AppCompatActivity {
                                 //todo callback
 
                                 if (task.isSuccessful()) {
-                                    System.out.println("task success");
-                                    Intent i = new Intent(SplashActivity.this, MainActivity.class);
-                                    startActivity(i);
-                                    finish();
+                                    userSignIn();
                                 } else {
                                     System.out.println("task failed");
                                     onLoginFailure(new Exception("no connection"));
@@ -97,7 +158,7 @@ public class SplashActivity extends AppCompatActivity {
                     Toast.makeText(this, "sign in failed\n"+response, Toast.LENGTH_SHORT).show();
                     startActivityForResult(authUI, RC_SIGN_IN);
                 } else {
-                    finish();
+                    roleCheck();
                 }
             }
         }

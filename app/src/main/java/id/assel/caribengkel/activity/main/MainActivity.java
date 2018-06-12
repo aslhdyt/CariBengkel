@@ -47,6 +47,7 @@ import java.util.List;
 import id.assel.caribengkel.R;
 import id.assel.caribengkel.activity.auth.SplashActivity;
 import id.assel.caribengkel.model.Workshop;
+import id.assel.caribengkel.tools.LoginPref;
 import id.assel.caribengkel.tools.Utils;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -105,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 item5)
             .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                 @Override
-                public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                public boolean onItemClick(final View view, int position, IDrawerItem drawerItem) {
                     if (drawerItem == item1) {
                         System.out.println("item1 clicked");
                     } else  if (drawerItem == item2) {
@@ -119,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             .signOut(MainActivity.this)
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                 public void onComplete(@NonNull Task<Void> task) {
+                                    LoginPref.clearAll(view.getContext());
                                     Intent intent = new Intent(MainActivity.this, SplashActivity.class);
                                     startActivity(intent);
                                     finish();
