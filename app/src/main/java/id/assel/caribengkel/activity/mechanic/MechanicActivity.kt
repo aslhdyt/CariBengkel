@@ -48,7 +48,7 @@ class MechanicActivity : AppCompatActivity() {
                     workshopName.add(workshop.name)
                 }
 
-                val adapter = ArrayAdapter(this@MechanicActivity, R.layout.support_simple_spinner_dropdown_item, workshopName)
+                val adapter = ArrayAdapter(this@MechanicActivity, android.R.layout.simple_spinner_dropdown_item, workshopName)
                 spinnerMechanic.adapter = adapter
             } else {
                 spinnerMechanic.adapter = null
