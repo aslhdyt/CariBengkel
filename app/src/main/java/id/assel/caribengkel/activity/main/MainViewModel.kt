@@ -7,5 +7,7 @@ import id.assel.caribengkel.activity.main.data.WorkshopLiveData
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
-    internal var workshopLocation = WorkshopLiveData(getApplication())
+    var workshopLocation = WorkshopLiveData(getApplication())
+
+
 }

@@ -44,6 +44,7 @@ public class Debug {
 
             Workshop data = new Workshop();
             data.setLatLng(point);
+            data.setId(finalI);
             data.setName("Bengkel "+finalI);
             FR.document("workshop/"+i).set(data).addOnSuccessListener(activity, new OnSuccessListener<Void>() {
                 @Override

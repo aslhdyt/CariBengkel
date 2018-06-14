@@ -24,6 +24,7 @@ import java.util.Map;
 import id.assel.caribengkel.R;
 import id.assel.caribengkel.activity.main.MainActivity;
 import id.assel.caribengkel.activity.mechanic.MechanicActivity;
+import id.assel.caribengkel.tools.Debug;
 import id.assel.caribengkel.tools.LoginPref;
 
 public class SplashActivity extends AppCompatActivity {
@@ -42,7 +43,7 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
 //        only for populate data to firestore
-//        id.assel.caribengkel.debug.Debug.debugSetLocation(this);
+//        Debug.debugSetLocation(this);
 
         //todo create mechanic and user dialog
 

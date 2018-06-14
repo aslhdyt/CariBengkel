@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         final GoogleMap mMap = googleMap;
 
 
-        viewModel.getWorkshopLocation$production_sources_for_module_app().observe(this, new Observer<List<Workshop>>() {
+        viewModel.getWorkshopLocation().observe(this, new Observer<List<Workshop>>() {
             boolean firstInit = true;
             @Override
             public void onChanged(@Nullable List<Workshop> workshops) {

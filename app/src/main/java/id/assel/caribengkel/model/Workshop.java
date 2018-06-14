@@ -3,8 +3,17 @@ package id.assel.caribengkel.model;
 import com.google.firebase.firestore.GeoPoint;
 
 public class Workshop {
+    public int id;
     public GeoPoint latLng;
     public String name;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public GeoPoint getLatLng() {
         return latLng;
