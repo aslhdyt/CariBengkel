@@ -1,6 +1,5 @@
 package id.assel.caribengkel.activity.mechanic
 
-import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
@@ -12,13 +11,11 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import id.assel.caribengkel.R
 import id.assel.caribengkel.activity.auth.SplashActivity
-import id.assel.caribengkel.model.Workshop
 import id.assel.caribengkel.tools.LoginPref
 import kotlinx.android.synthetic.main.activity_mechanic.*
 
 class MechanicActivity : AppCompatActivity() {
     lateinit var viewModel: MechanicViewModel
-    var selectedWorkshop: MutableLiveData<Workshop> = MutableLiveData<Workshop>();
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,9 +28,9 @@ class MechanicActivity : AppCompatActivity() {
             override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long) {
                 val workshop = viewModel.workshops.value?.get(i)
                 if (workshop != null) {
-                    selectedWorkshop.postValue(workshop)
+                    viewModel.selectedWorkshop.postValue(workshop)
                 } else
-                    selectedWorkshop.postValue(null)
+                    viewModel.selectedWorkshop.postValue(null)
             }
 
             override fun onNothingSelected(adapterView: AdapterView<*>) {
@@ -51,7 +48,7 @@ class MechanicActivity : AppCompatActivity() {
                 spinnerMechanic.adapter = null
             }
         })
-        selectedWorkshop.observe(this, Observer {
+        viewModel.selectedWorkshop.observe(this, Observer {
             Toast.makeText(this@MechanicActivity, it?.name, Toast.LENGTH_SHORT).show()
         })
 
