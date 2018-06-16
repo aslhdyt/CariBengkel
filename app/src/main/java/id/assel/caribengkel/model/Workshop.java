@@ -6,6 +6,7 @@ public class Workshop {
     public int id;
     public GeoPoint latLng;
     public String name;
+    public Boolean isActive;
 
     public int getId() {
         return id;
@@ -29,5 +30,13 @@ public class Workshop {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
     }
 }

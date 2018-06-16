@@ -49,13 +49,23 @@ class MechanicActivity : AppCompatActivity() {
             }
         })
         viewModel.selectedWorkshop.observe(this, Observer {
+            if (it != null) {
+                switchJob.isEnabled = true
+                switchJob.isChecked = it.isActive ?: false
+
+                tvCoordinate.text = "${it.latLng.latitude}\n${it.latLng.longitude}"
+            } else {
+                switchJob.isChecked = false
+                switchJob.isEnabled = false
+                tvCoordinate.text = "-"
+            }
             Toast.makeText(this@MechanicActivity, it?.name, Toast.LENGTH_SHORT).show()
         })
 
 
 
 
-        findViewById<View>(R.id.buttonSignOut).setOnClickListener { view ->
+        buttonSignOut.setOnClickListener { view ->
             LoginPref.clearAll(view.context)
 
             val intent = Intent(this@MechanicActivity, SplashActivity::class.java)
