@@ -13,6 +13,7 @@ import id.assel.caribengkel.R
 import id.assel.caribengkel.activity.auth.SplashActivity
 import id.assel.caribengkel.tools.LoginPref
 import kotlinx.android.synthetic.main.activity_mechanic.*
+import kotlinx.android.synthetic.main.activity_mechanic.switchJob
 
 class MechanicActivity : AppCompatActivity() {
     lateinit var viewModel: MechanicViewModel
@@ -47,22 +48,19 @@ class MechanicActivity : AppCompatActivity() {
             } else {
                 spinnerMechanic.adapter = null
             }
+            viewModel.workshops.removeObservers(this)
         })
         viewModel.selectedWorkshop.observe(this, Observer {
             if (it != null) {
                 switchJob.isEnabled = true
                 switchJob.isChecked = it.isActive ?: false
-
                 tvCoordinate.text = "${it.latLng.latitude}\n${it.latLng.longitude}"
             } else {
                 switchJob.isChecked = false
                 switchJob.isEnabled = false
                 tvCoordinate.text = "-"
             }
-            Toast.makeText(this@MechanicActivity, it?.name, Toast.LENGTH_SHORT).show()
         })
-
-
 
 
         buttonSignOut.setOnClickListener { view ->
@@ -72,6 +70,12 @@ class MechanicActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+
+        switchJob.setOnCheckedChangeListener { compoundButton, isChecked ->
+            viewModel.setActiveWorkshop(isChecked, viewModel.selectedWorkshop.value)
+        }
+
+
     }
 
 
