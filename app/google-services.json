@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "925450354522-srbt5e66787vlgbdrohulbe3gks6mm79.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "id.assel.caribengkel",
+            "certificate_hash": "6704be80a42e2d6997517bd7dbf64855a322b026"
+          }
+        },
+        {
           "client_id": "925450354522-e7h5ph2muv3qa5uunue8eld8bqac8kqv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

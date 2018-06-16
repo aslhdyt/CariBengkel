@@ -7,8 +7,8 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="/data/Documents/assel/CariBengkel" />
-            <option value="/data/Documents/assel/CariBengkel/app" />
+            <option value="/data/Public/Assel/Documents/Projects/CariBengkel" />
+            <option value="/data/Public/Assel/Documents/Projects/CariBengkel/app" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
