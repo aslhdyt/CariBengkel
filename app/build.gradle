@@ -22,7 +22,7 @@ android {
     buildToolsVersion '28.0.0'
 }
 
-ext.supportLib = '27.1.0'
+ext.supportLib = '27.1.1'
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
@@ -41,7 +41,7 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     implementation 'com.squareup.picasso:picasso:2.71828'
     //firebase
-    implementation 'com.google.firebase:firebase-auth:16.0.1'
+    implementation 'com.google.firebase:firebase-auth:16.0.2'
     implementation 'com.firebaseui:firebase-ui-auth:3.3.1'
     implementation 'com.google.firebase:firebase-firestore:17.0.1'
     //google services

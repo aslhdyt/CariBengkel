@@ -142,9 +142,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onChanged(@Nullable List<Workshop> workshops) {
                 if (workshops != null) {
+
+                    int px =  Utils.dpToPx(MainActivity.this, 40);
                     //create marker icon
                     Bitmap bitmap = Utils.getBitmapFromVectorDrawable(MainActivity.this, R.drawable.ic_toolbox);
-                    bitmap = Bitmap.createScaledBitmap(bitmap, 40, 40, false);
+                    bitmap = Bitmap.createScaledBitmap(bitmap,px,px, false);
                     BitmapDescriptor markerIcon = BitmapDescriptorFactory.fromBitmap(bitmap);
 
                     LatLngBounds.Builder builder = new LatLngBounds.Builder();
