@@ -141,18 +141,31 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             boolean firstInit = true;
             @Override
             public void onChanged(@Nullable List<Workshop> workshops) {
+                mMap.clear();
                 if (workshops != null) {
 
-                    int px =  Utils.dpToPx(MainActivity.this, 40);
                     //create marker icon
                     Bitmap bitmap = Utils.getBitmapFromVectorDrawable(MainActivity.this, R.drawable.ic_toolbox);
-                    bitmap = Bitmap.createScaledBitmap(bitmap,px,px, false);
-                    BitmapDescriptor markerIcon = BitmapDescriptorFactory.fromBitmap(bitmap);
 
                     LatLngBounds.Builder builder = new LatLngBounds.Builder();
                     for (Workshop workshop : workshops) {
+                        BitmapDescriptor markerIcon;
+                        String iconSnippet;
+                        if (workshop.getActive()) {
+                            //larger icon
+                            int px =  Utils.dpToPx(MainActivity.this, 40);
+                            bitmap = Bitmap.createScaledBitmap(bitmap,px,px, false);
+                            markerIcon = BitmapDescriptorFactory.fromBitmap(bitmap);
+                            iconSnippet = "Operasional";
+                        } else {
+                            //smaller greyscalled icon
+                            int px =  Utils.dpToPx(MainActivity.this, 20);
+                            bitmap = Bitmap.createScaledBitmap(bitmap,px,px, false);
+                            markerIcon = BitmapDescriptorFactory.fromBitmap(Utils.toGrayscale(bitmap));
+                            iconSnippet = "Tutup";
+                        }
                         LatLng latLng = new LatLng(workshop.getLatLng().getLatitude(), workshop.getLatLng().getLongitude());
-                        mMap.addMarker(new MarkerOptions().position(latLng).title(workshop.getName()).icon(markerIcon));
+                        mMap.addMarker(new MarkerOptions().position(latLng).title(workshop.getName()).snippet(iconSnippet).icon(markerIcon));
 
                         if (firstInit) builder.include(latLng);
                     }
@@ -162,8 +175,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
                         firstInit = false;
                     }
-                } else {
-                    mMap.clear();
                 }
             }
         });

@@ -29,10 +29,10 @@ class MechanicActivity : AppCompatActivity() {
             override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long) {
                 val workshop = viewModel.workshops.value?.get(i)
                 selectedWorkshop.removeObservers(this@MechanicActivity)
-                if (workshop != null) {
-                    selectedWorkshop = Transformations.switchMap(viewModel.workshops) { viewModel.getWorkshopRepository(workshop) }
-                } else
-                    selectedWorkshop = Transformations.switchMap(viewModel.workshops) { null }
+                selectedWorkshop = if (workshop != null)
+                    Transformations.switchMap(viewModel.workshops) { viewModel.getWorkshopRepository(workshop) }
+                else
+                    Transformations.switchMap(viewModel.workshops) { null }
                 selectedWorkshop.observe(this@MechanicActivity, workshopObserver)
             }
 
