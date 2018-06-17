@@ -10,4 +10,8 @@ data class Workshop (
 ) {
     //empty constructor for firestore
     constructor(): this(0, GeoPoint(0.0,0.0), "", false)
+
+    override fun toString(): String {
+        return name
+    }
 }

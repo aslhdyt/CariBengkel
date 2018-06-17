@@ -27,7 +27,7 @@ class MechanicActivity : AppCompatActivity() {
 
         spinnerMechanic.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long) {
-                val workshop = viewModel.workshops.value?.get(i)
+                val workshop = spinnerMechanic.adapter.getItem(i) as Workshop?
                 selectedWorkshop.removeObservers(this@MechanicActivity)
                 selectedWorkshop = if (workshop != null)
                     Transformations.switchMap(viewModel.workshops) { viewModel.getWorkshopRepository(workshop) }
@@ -43,10 +43,17 @@ class MechanicActivity : AppCompatActivity() {
 
         viewModel.workshops.observe(this, Observer { workshops ->
             if (workshops != null) {
-                workshops.sortBy { it.id }
+                val sorted = workshops.sortedBy { it.id }
 
-                val adapter = ArrayAdapter(this@MechanicActivity, android.R.layout.simple_spinner_dropdown_item, workshops.map { it.name })
+                val adapter = ArrayAdapter(this@MechanicActivity, android.R.layout.simple_spinner_dropdown_item, sorted)
                 spinnerMechanic.adapter = adapter
+
+                spinnerMechanic.visibility = View.VISIBLE
+                switchJob.visibility = View.VISIBLE
+                textView2.visibility = View.VISIBLE
+                tvCoordinate.visibility = View.VISIBLE
+                textView3.visibility = View.VISIBLE
+
                 viewModel.workshops.removeObservers(this)
             } else {
                 spinnerMechanic.adapter = null

@@ -19,12 +19,14 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Spinner
+        style="@style/Widget.AppCompat.Spinner"
         android:id="@+id/spinnerMechanic"
-        android:layout_width="368dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -36,6 +38,7 @@
         android:layout_marginEnd="32dp"
         android:layout_marginTop="8dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/spinnerMechanic" />
 
@@ -48,6 +51,7 @@
         android:text="kordinat :"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textSize="14sp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/tvCoordinate"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/switchJob" />
@@ -62,6 +66,7 @@
         android:text="-"
         android:textAlignment="textEnd"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textView2"
         app:layout_constraintTop_toBottomOf="@+id/switchJob"
@@ -74,8 +79,9 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="32dp"
         android:gravity="fill_vertical"
-        android:text="Terima Kerja :"
+        android:text="Aktif :"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/switchJob"
         app:layout_constraintEnd_toStartOf="@+id/switchJob"
         app:layout_constraintHorizontal_bias="0.0"
