@@ -3,14 +3,20 @@ package id.assel.caribengkel.activity.main;
 import android.Manifest;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Looper;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -18,6 +24,9 @@ import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -143,33 +152,71 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         findViewById(R.id.buttonFindMechanic).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
                 //get current location
-                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(view.getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(MainActivity.this,
-                            new String[]{Manifest.permission.READ_CONTACTS},
-                            REQUEST_PERMISSIONS_LOCATION);
-                    return;
-                }
-                FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(MainActivity.this);
-                fusedLocationClient.getLastLocation().addOnCompleteListener(MainActivity.this, new OnCompleteListener<Location>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Location> task) {
-                        //TODO result is null
-                        viewModel.postOrder(task.getResult(), new MainViewModel.UserActivivityCallback() {
+                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+                    boolean gps_enabled = false;
+                    try {
+                        gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                    }catch (Exception ex){}
+                    boolean network_enabled = false;
+                    try{
+                        network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                    }catch (Exception ex){}
+                    if(!gps_enabled && !network_enabled){
+                        AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+                        dialog.setMessage(getResources().getString(R.string.gps_network_not_enabled));
+                        dialog.setPositiveButton(getResources().getString(R.string.open_location_settings), new DialogInterface.OnClickListener() {
                             @Override
-                            public void onOrderPosted() {
-                                //TODO wait ui
-                                    Toast.makeText(MainActivity.this, "TODO create waiting UI", Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onFailure(@NotNull Exception exception) {
-                                Toast.makeText(MainActivity.this, "Pesanan gagal\nreason: "+exception.getMessage(), Toast.LENGTH_SHORT).show();
+                            public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                                Intent myIntent = new Intent( Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                startActivity(myIntent);
                             }
                         });
+                        dialog.setNegativeButton(getString(R.string.Cancel), new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                                // TODO Auto-generated method stub
+
+                            }
+                        });
+                        dialog.show();
+                        return;
                     }
-                });
+
+
+                    view.setEnabled(false);
+                    LocationRequest locationRequest = new LocationRequest().setFastestInterval(2000L).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(4000L);
+                    final FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(MainActivity.this);
+                    fusedLocationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
+                        @Override
+                        public void onLocationResult(LocationResult locationResult) {
+                            if (locationResult != null) {
+                                System.out.println("result: "+locationResult.getLastLocation());
+                                fusedLocationClient.removeLocationUpdates(this);
+                                viewModel.postOrder(locationResult.getLastLocation(), new MainViewModel.UserActivivityCallback() {
+                                    @Override
+                                    public void onOrderPosted() {
+                                        //TODO wait ui
+                                        Toast.makeText(MainActivity.this, "TODO create waiting UI", Toast.LENGTH_SHORT).show();
+                                        view.setEnabled(true);
+                                    }
+
+                                    @Override
+                                    public void onFailure(@NotNull Exception exception) {
+                                        Toast.makeText(MainActivity.this, "Pesanan gagal\nreason: "+exception.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            } else {
+                                System.out.println("no location updates");
+                            }
+                        }
+                    }, Looper.myLooper());
+                } else {
+                    checkLocationPermission();
+                }
 
             }
         });
@@ -224,4 +271,40 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     static int REQUEST_PERMISSIONS_LOCATION = 10;
+
+    private void checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+                new AlertDialog.Builder(this)
+                        .setTitle("Location Permission Needed")
+                        .setMessage("This app needs the Location permission, please accept to use location functionality")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                //Prompt the user once explanation has been shown
+                                ActivityCompat.requestPermissions(MainActivity.this,
+                                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                        REQUEST_PERMISSIONS_LOCATION );
+                            }
+                        })
+                        .create()
+                        .show();
+
+
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_PERMISSIONS_LOCATION );
+            }
+        }
+    }
 }

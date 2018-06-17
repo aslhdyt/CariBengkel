@@ -40,6 +40,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
     }
 
+
+
     interface UserActivivityCallback {
         fun onOrderPosted()
         fun onFailure(exception: Exception)
