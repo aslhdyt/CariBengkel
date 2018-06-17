@@ -76,7 +76,7 @@ class MechanicActivity : AppCompatActivity() {
     val workshopObserver = Observer<Workshop> {
         if (it != null) {
             switchJob.isEnabled = true
-            switchJob.isChecked = it.active ?: false
+            switchJob.isChecked = it.active
             tvCoordinate.text = "${it.latLng.latitude}\n${it.latLng.longitude}"
         } else {
             switchJob.isChecked = false

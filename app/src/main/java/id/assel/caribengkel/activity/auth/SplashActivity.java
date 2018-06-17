@@ -7,6 +7,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
@@ -57,7 +59,10 @@ public class SplashActivity extends AppCompatActivity {
 
         if (role == null) { //role not yet set
             final int[] roleCode = {0};
+            LayoutInflater inflater = this.getLayoutInflater();
+            View title =  inflater.inflate(R.layout.layout_header, null);
             final AlertDialog dialog = new AlertDialog.Builder(SplashActivity.this)
+                    .setCustomTitle(title)
                     .setCancelable(true)
                     .setOnCancelListener(new DialogInterface.OnCancelListener() {
                         @Override
@@ -89,6 +94,7 @@ public class SplashActivity extends AppCompatActivity {
                         }
                     }).create();
             dialog.setCanceledOnTouchOutside(false);
+            dialog.setContentView(R.layout.layout_header);
             dialog.show();
 
         } else {
