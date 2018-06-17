@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Cari Bengkel</string>
-    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_main">Cari Bengkel</string>
     <string name="title_activity_login">Sign in</string>
 
     <!-- Strings related to login -->

@@ -40,10 +40,11 @@
 
         <activity
             android:name=".activity.main.MainActivity"
-            android:label="@string/title_activity_maps"
-            android:screenOrientation="portrait"></activity>
+            android:label="@string/title_activity_main"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".activity.auth.SplashActivity"
+            android:theme="@style/SplashTheme"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

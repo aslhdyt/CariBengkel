@@ -12,7 +12,6 @@ import id.assel.caribengkel.activity.auth.SplashActivity
 import id.assel.caribengkel.model.Workshop
 import id.assel.caribengkel.tools.LoginPref
 import kotlinx.android.synthetic.main.activity_mechanic.*
-import kotlinx.android.synthetic.main.activity_mechanic.switchJob
 
 class MechanicActivity : AppCompatActivity() {
     lateinit var viewModel: MechanicViewModel

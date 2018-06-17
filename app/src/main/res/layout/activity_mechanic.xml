@@ -6,6 +6,26 @@
     android:layout_height="match_parent"
     tools:context=".activity.mechanic.MechanicActivity">
 
+    <LinearLayout
+        android:id="@+id/spinnerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="54dp"
+        android:background="@color/accent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <Spinner
+            android:id="@+id/spinnerMechanic"
+            style="@style/Widget.AppCompat.Spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:visibility="visible" />
+
+    </LinearLayout>
     <Button
         android:id="@+id/buttonSignOut"
         android:layout_width="wrap_content"
@@ -18,18 +38,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <Spinner
-        style="@style/Widget.AppCompat.Spinner"
-        android:id="@+id/spinnerMechanic"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <Switch
         android:id="@+id/switchJob"
@@ -40,7 +48,7 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinnerMechanic" />
+        app:layout_constraintTop_toBottomOf="@+id/spinnerLayout" />
 
     <TextView
         android:id="@+id/textView2"
