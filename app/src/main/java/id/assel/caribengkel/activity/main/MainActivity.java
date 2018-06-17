@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     LatLngBounds.Builder builder = new LatLngBounds.Builder();
                     for (Workshop workshop : workshops) {
-                        LatLng latLng = new LatLng(workshop.getLatLng().getLatitude(), workshop.latLng.getLongitude());
+                        LatLng latLng = new LatLng(workshop.getLatLng().getLatitude(), workshop.getLatLng().getLongitude());
                         mMap.addMarker(new MarkerOptions().position(latLng).title(workshop.getName()).icon(markerIcon));
 
                         if (firstInit) builder.include(latLng);

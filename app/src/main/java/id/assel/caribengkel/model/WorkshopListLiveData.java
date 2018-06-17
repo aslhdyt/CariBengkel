@@ -1,4 +1,4 @@
-package id.assel.caribengkel.activity.main.data;
+package id.assel.caribengkel.model;
 
 import android.arch.lifecycle.LiveData;
 import android.content.Context;
@@ -15,11 +15,11 @@ import java.util.List;
 
 import id.assel.caribengkel.model.Workshop;
 
-public class WorkshopLiveData extends LiveData<List<Workshop>> {
+public class WorkshopListLiveData extends LiveData<List<Workshop>> {
     private CollectionReference reference = FirebaseFirestore.getInstance().collection("workshop");
     private ListenerRegistration listenerRegistration;
     private Context context;
-    public WorkshopLiveData(Context context) {
+    public WorkshopListLiveData(Context context) {
         this.context = context;
     }
     @Override
