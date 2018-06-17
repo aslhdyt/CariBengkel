@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
@@ -235,7 +236,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (workshops != null) {
 
                     //create marker icon
-                    Bitmap bitmap = Utils.getBitmapFromVectorDrawable(MainActivity.this, R.drawable.ic_toolbox);
 
                     LatLngBounds.Builder builder = new LatLngBounds.Builder();
                     for (Workshop workshop : workshops) {
@@ -243,12 +243,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         String iconSnippet;
                         if (workshop.getActive()) {
                             //larger icon
-                            int px =  Utils.dpToPx(MainActivity.this, 40);
+                            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_toolbox_circled_round);
+                            int px =  Utils.dpToPx(MainActivity.this, 50);
                             bitmap = Bitmap.createScaledBitmap(bitmap,px,px, false);
                             markerIcon = BitmapDescriptorFactory.fromBitmap(bitmap);
                             iconSnippet = "Operasional";
                         } else {
                             //smaller greyscalled icon
+                            Bitmap bitmap = Utils.getBitmapFromVectorDrawable(MainActivity.this, R.drawable.ic_toolbox);
                             int px =  Utils.dpToPx(MainActivity.this, 20);
                             bitmap = Bitmap.createScaledBitmap(bitmap,px,px, false);
                             markerIcon = BitmapDescriptorFactory.fromBitmap(Utils.toGrayscale(bitmap));
