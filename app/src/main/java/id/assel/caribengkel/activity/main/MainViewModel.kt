@@ -4,8 +4,8 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.location.Location
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.*
+import com.google.firebase.firestore.EventListener
 import id.assel.caribengkel.model.Order
 import id.assel.caribengkel.model.Workshop
 import id.assel.caribengkel.model.WorkshopListLiveData
@@ -17,8 +17,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     lateinit var user: FirebaseUser
     var isUserCancelOrder = false
 
-    fun postOrder(username: String, location: Location, callback: OrderCallback) {
-        //todo find workshop
+    fun postOrder(user: FirebaseUser, location: Location, callback: OrderCallback) {
+        isUserCancelOrder = false
 
         val firestore = FirebaseFirestore.getInstance()
 
@@ -48,10 +48,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     if (iterator.hasNext()) {
                         val value = iterator.next()
 
+                        val displayName = user.displayName
+                        val username: String = if (!displayName.isNullOrEmpty()) displayName!! else user.email ?: ""
                         //create order
                         val order = Order(
                                 uuid = UUID.randomUUID().toString(),
-                                userUuid = user.uid,
+                                userUuid = this.user.uid,
                                 location = GeoPoint(location.latitude, location.longitude),
                                 workshopId = value.id,
                                 username = username
@@ -82,7 +84,49 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                                 callback.onCanceled()
                                                 return@notifyMechanic
                                             } else {
-                                                callback.onOrderPosted()
+                                                var registrationListener: ListenerRegistration? = null
+                                                val stopListen = Runnable {
+                                                    if (registrationListener != null) {
+                                                        println("listener removed")
+                                                        registrationListener?.remove()
+                                                    } else {
+                                                        println("listener failed to remove")
+                                                    }
+                                                }
+                                                registrationListener = firestore.document("order/${order.uuid}")
+                                                    .addSnapshotListener (EventListener<DocumentSnapshot> { documentSnapshot, firebaseFirestoreException ->
+                                                        println("snapshotListener fired")
+                                                        if (isUserCancelOrder) {
+                                                            order.status = Order.ORDER_USER_CANCEL
+                                                            order.endAt = System.currentTimeMillis()
+                                                            FirebaseFirestore.getInstance().document("order/${order.uuid}").set(order)
+                                                            callback.onCanceled()
+                                                            return@EventListener
+                                                        }
+                                                        if (firebaseFirestoreException != null) {
+                                                            //ignore the exception
+                                                            firebaseFirestoreException.printStackTrace()
+                                                            println("TODO handle error")
+                                                        }
+                                                        val updatedOrder = documentSnapshot?.toObject(Order::class.java)
+                                                        if (updatedOrder !=null) {
+                                                            println("order exist, status: ${updatedOrder.status}")
+                                                            when (updatedOrder.status) {
+                                                                Order.ORDER_ONGOING -> {
+                                                                    println("order accepted")
+                                                                    callback.onOrderAccepted()
+                                                                    stopListen.run()
+                                                                }
+                                                                Order.ORDER_MECHANIC_CANCEL -> {
+                                                                    println("mechanic rejecting the job")
+                                                                    requestOrderLoop()
+                                                                    stopListen.run()
+                                                                }
+                                                            }
+                                                        } else {
+                                                            requestOrderLoop()
+                                                        }
+                                                    })
                                             }
                                         }
                                     }
@@ -105,8 +149,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
 
     interface OrderCallback {
-        fun onCanceled();
-        fun onOrderPosted()
+        fun onCanceled()
+        fun onOrderAccepted()
         fun onProcessingOrder(processMessage: String)
         fun onFailure(exception: Exception)
     }

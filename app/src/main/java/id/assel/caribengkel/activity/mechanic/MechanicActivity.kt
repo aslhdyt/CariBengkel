@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import com.google.firebase.firestore.FirebaseFirestore
 import id.assel.caribengkel.R
 import id.assel.caribengkel.activity.auth.SplashActivity
 import id.assel.caribengkel.model.Order
@@ -91,19 +92,28 @@ class MechanicActivity : AppCompatActivity() {
 
                 val currentOrder = OrderLiveData(this@MechanicActivity, orderUUID)
                 currentOrder.observe(this, Observer {
-                    if (it != null && it.status == Order.ORDER_PENDING) {
+                    if (it != null) {
                         val jobDialog = JobDialog(this@MechanicActivity, it, object : JobDialog.JobResponse {
                             override fun onJobsAccepted(order: Order) {
-                                viewModel.acceptJob(order)
+                                viewModel.acceptJob(it)
                                 Toast.makeText(this@MechanicActivity, "TODO notify user", Toast.LENGTH_SHORT).show()
                             }
 
                             override fun onJobsRejected(order: Order) {
-                                viewModel.rejectJob(order)
+                                viewModel.rejectJob(it)
                             }
 
                         })
-                        jobDialog.show()
+                        when (it.status) {
+                            Order.ORDER_PENDING -> jobDialog.show()
+                            Order.ORDER_ONGOING -> println("TODO show current job")
+                            Order.ORDER_FINISH -> println("TODO clear order related view")
+                            Order.ORDER_USER_CANCEL, Order.ORDER_MECHANIC_CANCEL -> {
+                                FirebaseFirestore.getInstance().document("workshop/${workshop.id}").update("currentOrderUuid", null)
+                                jobDialog.dismiss()
+                            }
+
+                        }
                     } else {
                         println("order do not exist")
                     }
