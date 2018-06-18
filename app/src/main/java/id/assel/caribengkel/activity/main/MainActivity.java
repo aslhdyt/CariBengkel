@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setSupportActionBar(toolbar);
 
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
             Intent intent = new Intent(MainActivity.this, SplashActivity.class);
             startActivity(intent);
@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         public void onLocationResult(LocationResult locationResult) {
                             if (locationResult != null) {
                                 fusedLocationClient.removeLocationUpdates(this);
-                                viewModel.postOrder(locationResult.getLastLocation(), new MainViewModel.OrderCallback() {
+                                viewModel.postOrder(user.getDisplayName(), locationResult.getLastLocation(), new MainViewModel.OrderCallback() {
 
                                     @Override
                                     public void onOrderPosted() {

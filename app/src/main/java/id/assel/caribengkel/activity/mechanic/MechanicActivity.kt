@@ -1,6 +1,9 @@
 package id.assel.caribengkel.activity.mechanic
 
-import android.arch.lifecycle.*
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.Transformations
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -9,6 +12,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import id.assel.caribengkel.R
 import id.assel.caribengkel.activity.auth.SplashActivity
+import id.assel.caribengkel.model.OrderLiveData
 import id.assel.caribengkel.model.Workshop
 import id.assel.caribengkel.tools.LoginPref
 import kotlinx.android.synthetic.main.activity_mechanic.*
@@ -78,6 +82,29 @@ class MechanicActivity : AppCompatActivity() {
             switchJob.isEnabled = true
             switchJob.isChecked = it.active
             tvCoordinate.text = "${it.latLng.latitude}\n${it.latLng.longitude}"
+
+            val orderUUID = it.currentOrderUuid
+            if (!orderUUID.isNullOrBlank() && orderUUID != null) {
+                val currentOrder = OrderLiveData(this@MechanicActivity, orderUUID)
+                currentOrder.observe(this, Observer {
+                    if (it != null) {
+                        val jobDialog = JobDialog(this@MechanicActivity, it, object : JobDialog.JobResponse {
+                            override fun onJobsAccepted() {
+                                viewModel.acceptJob()
+                            }
+
+                            override fun onJobsRejected() {
+                                viewModel.rejectJob()
+                            }
+
+                        })
+                        jobDialog.show()
+                    } else {
+                        println("order do not exist")
+                    }
+                })
+            }
+
         } else {
             switchJob.isChecked = false
             switchJob.isEnabled = false

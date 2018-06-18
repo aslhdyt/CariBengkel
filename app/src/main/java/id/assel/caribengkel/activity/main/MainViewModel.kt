@@ -17,7 +17,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     lateinit var user: FirebaseUser
     var isUserCancelOrder = false
 
-    fun postOrder(location: Location, callback: OrderCallback) {
+    fun postOrder(username: String, location: Location, callback: OrderCallback) {
         //todo find workshop
 
         val firestore = FirebaseFirestore.getInstance()
@@ -53,7 +53,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                 uuid = UUID.randomUUID().toString(),
                                 userUuid = user.uid,
                                 location = GeoPoint(location.latitude, location.longitude),
-                                workshopId = value.id
+                                workshopId = value.id,
+                                username = username
                         )
                         //post order
                         firestore.document("order/${order.uuid}")

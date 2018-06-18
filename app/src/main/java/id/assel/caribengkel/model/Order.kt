@@ -5,6 +5,7 @@ import com.google.firebase.firestore.GeoPoint
 data class Order (
         val uuid: String,
         val userUuid: String,
+        val username: String,
         var workshopId: Int? = null,
         val createdAt: Long = System.currentTimeMillis(),
         val endAt: Long? = null,
@@ -12,7 +13,7 @@ data class Order (
         var status: String = ORDER_PENDING
 ) {
     //empty constructor required for firestore
-    constructor(): this("", "", 0, 0L, 0L, GeoPoint(0.0,0.0), "")
+    constructor(): this("", "","",0, 0L, 0L, GeoPoint(0.0,0.0), "")
     companion object {
         const val ORDER_PENDING ="PENDING"
         const val ORDER_ONGOING = "ONGOING"

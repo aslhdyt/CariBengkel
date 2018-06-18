@@ -24,4 +24,13 @@ class MechanicViewModel(application: Application): AndroidViewModel(application)
         return WorkshopLiveData(getApplication(), workshop.id)
     }
 
+    fun acceptJob() {
+        println("job accepted, TODO notify user")
+        //TODO notify user
+    }
+
+    fun rejectJob() {
+        println("job rejected, user find another mechanic")
+    }
+
 }
