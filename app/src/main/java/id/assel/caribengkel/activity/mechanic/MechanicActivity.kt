@@ -10,8 +10,10 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import id.assel.caribengkel.R
 import id.assel.caribengkel.activity.auth.SplashActivity
+import id.assel.caribengkel.model.Order
 import id.assel.caribengkel.model.OrderLiveData
 import id.assel.caribengkel.model.Workshop
 import id.assel.caribengkel.tools.LoginPref
@@ -77,24 +79,27 @@ class MechanicActivity : AppCompatActivity() {
         }
     }
 
-    val workshopObserver = Observer<Workshop> {
-        if (it != null) {
+    val workshopObserver = Observer<Workshop> { workshop ->
+        if (workshop != null) {
             switchJob.isEnabled = true
-            switchJob.isChecked = it.active
-            tvCoordinate.text = "${it.latLng.latitude}\n${it.latLng.longitude}"
+            switchJob.isChecked = workshop.active
+            tvCoordinate.text = "${workshop.latLng.latitude}\n${workshop.latLng.longitude}"
 
-            val orderUUID = it.currentOrderUuid
+            val orderUUID = workshop.currentOrderUuid
             if (!orderUUID.isNullOrBlank() && orderUUID != null) {
+                //delete last job
+
                 val currentOrder = OrderLiveData(this@MechanicActivity, orderUUID)
                 currentOrder.observe(this, Observer {
-                    if (it != null) {
+                    if (it != null && it.status == Order.ORDER_PENDING) {
                         val jobDialog = JobDialog(this@MechanicActivity, it, object : JobDialog.JobResponse {
-                            override fun onJobsAccepted() {
-                                viewModel.acceptJob()
+                            override fun onJobsAccepted(order: Order) {
+                                viewModel.acceptJob(order)
+                                Toast.makeText(this@MechanicActivity, "TODO notify user", Toast.LENGTH_SHORT).show()
                             }
 
-                            override fun onJobsRejected() {
-                                viewModel.rejectJob()
+                            override fun onJobsRejected(order: Order) {
+                                viewModel.rejectJob(order)
                             }
 
                         })
@@ -111,6 +116,4 @@ class MechanicActivity : AppCompatActivity() {
             tvCoordinate.text = "-"
         }
     }
-
-
 }

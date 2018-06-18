@@ -8,7 +8,7 @@ data class Order (
         val username: String,
         var workshopId: Int? = null,
         val createdAt: Long = System.currentTimeMillis(),
-        val endAt: Long? = null,
+        var endAt: Long? = null,
         val location: GeoPoint,
         var status: String = ORDER_PENDING
 ) {

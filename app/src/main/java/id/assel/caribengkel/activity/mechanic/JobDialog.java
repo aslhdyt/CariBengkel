@@ -43,15 +43,17 @@ public class JobDialog extends Dialog implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btnAccept:
-                listener.onJobsAccepted();
+                listener.onJobsAccepted(order);
+                break;
             case R.id.btnReject:
-                listener.onJobsRejected();
+                listener.onJobsRejected(order);
+                break;
         }
         dismiss();
     }
 
     interface JobResponse {
-        void onJobsAccepted();
-        void onJobsRejected();
+        void onJobsAccepted(Order order);
+        void onJobsRejected(Order order);
     }
 }
