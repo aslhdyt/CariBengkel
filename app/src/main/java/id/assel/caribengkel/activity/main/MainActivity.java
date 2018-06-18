@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                     });
                     orderDialog.show();
-                    orderDialog.progressMessage("Mengambil lokasi.");
+                    orderDialog.progressMessage("mencari lokasi anda.");
 
                     LocationRequest locationRequest = new LocationRequest().setFastestInterval(2000L).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(4000L);
                     final FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(MainActivity.this);
@@ -210,6 +210,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             if (locationResult != null) {
                                 fusedLocationClient.removeLocationUpdates(this);
                                 viewModel.postOrder(locationResult.getLastLocation(), new MainViewModel.OrderCallback() {
+
                                     @Override
                                     public void onOrderPosted() {
                                         //TODO create order complete UI
@@ -228,6 +229,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         Toast.makeText(MainActivity.this, "Pesanan gagal\n"+exception.getMessage(), Toast.LENGTH_SHORT).show();
                                         view.setEnabled(true);
                                         orderDialog.dismiss();
+                                    }
+                                    @Override
+                                    public void onCanceled() {
+                                        //user cancel rquest, nothing todo
                                     }
                                 });
                             } else {
