@@ -193,6 +193,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
                     view.setEnabled(false);
+                    final OrderDialog orderDialog = new OrderDialog(MainActivity.this, new OrderDialog.DialogListener() {
+                        @Override
+                        public void onCancel() {
+                            viewModel.cancelOrderRequest();
+                        }
+                    });
+                    orderDialog.show();
+                    orderDialog.progressMessage("Mengambil lokasi.");
 
                     LocationRequest locationRequest = new LocationRequest().setFastestInterval(2000L).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(4000L);
                     final FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(MainActivity.this);
@@ -200,7 +208,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         @Override
                         public void onLocationResult(LocationResult locationResult) {
                             if (locationResult != null) {
-                                System.out.println("result: "+locationResult.getLastLocation());
                                 fusedLocationClient.removeLocationUpdates(this);
                                 viewModel.postOrder(locationResult.getLastLocation(), new MainViewModel.OrderCallback() {
                                     @Override
@@ -208,16 +215,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         //TODO create order complete UI
                                         Toast.makeText(MainActivity.this, "TODO create order complete UI", Toast.LENGTH_SHORT).show();
                                         view.setEnabled(true);
+                                        orderDialog.dismiss();
                                     }
                                     @Override
                                     public void onProcessingOrder(String progressMessage) {
                                         System.out.println("progress: "+progressMessage);
+                                        orderDialog.progressMessage(progressMessage);
                                     }
 
                                     @Override
                                     public void onFailure(@NotNull Exception exception) {
                                         Toast.makeText(MainActivity.this, "Pesanan gagal\n"+exception.getMessage(), Toast.LENGTH_SHORT).show();
                                         view.setEnabled(true);
+                                        orderDialog.dismiss();
                                     }
                                 });
                             } else {
@@ -331,4 +341,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
     }
+
+
+
 }

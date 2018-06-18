@@ -10,7 +10,6 @@ import id.assel.caribengkel.model.Order
 import id.assel.caribengkel.model.Workshop
 import id.assel.caribengkel.model.WorkshopListLiveData
 import java.util.*
-import kotlin.collections.HashMap
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -23,6 +22,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val firestore = FirebaseFirestore.getInstance()
 
         //find available workshop
+        callback.onProcessingOrder("mencari bengkel yang tersedia")
         firestore.collection("workshop").whereEqualTo("active", true).whereEqualTo("currentOrderUuid", null)
                 .get()
                 .addOnCompleteListener {
@@ -67,6 +67,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                                         if (exc != null) {
                                                             requestOrderLoop()
                                                         } else {
+                                                            callback.onProcessingOrder("menunggu respon dari mekanik")
                                                             //wait for workshop accepting
                                                             callback.onOrderPosted()
                                                         }
@@ -107,6 +108,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 }
 
+
+    }
+
+    fun cancelOrderRequest() {
 
     }
 
