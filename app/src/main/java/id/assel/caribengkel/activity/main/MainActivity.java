@@ -21,10 +21,12 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
@@ -56,6 +58,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+import id.assel.caribengkel.BuildConfig;
 import id.assel.caribengkel.R;
 import id.assel.caribengkel.activity.auth.SplashActivity;
 import id.assel.caribengkel.model.Workshop;
@@ -70,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        ((TextView)findViewById(R.id.tvVersion)).setText("Versi: "+BuildConfig.VERSION_NAME);
 
         viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
 
@@ -159,12 +163,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
                     boolean gps_enabled = false;
                     try {
-                        gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                    }catch (Exception ex){}
+                        gps_enabled = lm != null && lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                    }catch (Exception ignored){}
                     boolean network_enabled = false;
                     try{
-                        network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-                    }catch (Exception ex){}
+                        network_enabled = lm != null && lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                    }catch (Exception ignored){}
                     if(!gps_enabled && !network_enabled){
                         AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
                         dialog.setMessage(getResources().getString(R.string.gps_network_not_enabled));
@@ -189,6 +193,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
                     view.setEnabled(false);
+
                     LocationRequest locationRequest = new LocationRequest().setFastestInterval(2000L).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(4000L);
                     final FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(MainActivity.this);
                     fusedLocationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
@@ -197,22 +202,39 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             if (locationResult != null) {
                                 System.out.println("result: "+locationResult.getLastLocation());
                                 fusedLocationClient.removeLocationUpdates(this);
-                                viewModel.postOrder(locationResult.getLastLocation(), new MainViewModel.UserActivivityCallback() {
+                                viewModel.postOrder(locationResult.getLastLocation(), new MainViewModel.OrderCallback() {
                                     @Override
                                     public void onOrderPosted() {
-                                        //TODO wait ui
-                                        Toast.makeText(MainActivity.this, "TODO create waiting UI", Toast.LENGTH_SHORT).show();
+                                        //TODO create order complete UI
+                                        Toast.makeText(MainActivity.this, "TODO create order complete UI", Toast.LENGTH_SHORT).show();
                                         view.setEnabled(true);
+                                    }
+                                    @Override
+                                    public void onProcessingOrder(String progressMessage) {
+                                        System.out.println("progress: "+progressMessage);
                                     }
 
                                     @Override
                                     public void onFailure(@NotNull Exception exception) {
-                                        Toast.makeText(MainActivity.this, "Pesanan gagal\nreason: "+exception.getMessage(), Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(MainActivity.this, "Pesanan gagal\n"+exception.getMessage(), Toast.LENGTH_SHORT).show();
+                                        view.setEnabled(true);
                                     }
                                 });
                             } else {
                                 System.out.println("no location updates");
                             }
+                        }
+
+                        @Override
+                        public void onLocationAvailability(LocationAvailability locationAvailability) {
+                            if (locationAvailability.isLocationAvailable()) {
+                                System.out.println("location available");
+                            } else {
+                                fusedLocationClient.removeLocationUpdates(this);
+                                Toast.makeText(MainActivity.this, "layanan lokasi tidak tersedia", Toast.LENGTH_SHORT).show();
+                                view.setEnabled(true);
+                            }
+                            super.onLocationAvailability(locationAvailability);
                         }
                     }, Looper.myLooper());
                 } else {

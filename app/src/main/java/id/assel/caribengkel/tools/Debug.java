@@ -46,6 +46,7 @@ public class Debug {
             data.setLatLng(point);
             data.setId(finalI);
             data.setName("Bengkel "+finalI);
+            data.setCurrentOrderUuid(null);
             FR.document("workshop/"+i).set(data).addOnSuccessListener(activity, new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {

@@ -13,6 +13,7 @@ class MechanicViewModel(application: Application): AndroidViewModel(application)
     fun setActiveWorkshop(checked: Boolean, selectedWorkshop: Workshop?) {
         if (selectedWorkshop != null) {
             selectedWorkshop.active = checked
+            selectedWorkshop.currentOrderUuid = null
             FirebaseFirestore.getInstance().document("workshop/${selectedWorkshop.id}")
                     .set(selectedWorkshop)
         }

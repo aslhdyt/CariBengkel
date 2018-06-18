@@ -8,6 +8,9 @@ data class Workshop (
     var name: String,
     var active: Boolean
 ) {
+    var currentOrderUuid: String? = null
+
+
     //empty constructor for firestore
     constructor(): this(0, GeoPoint(0.0,0.0), "", false)
 
