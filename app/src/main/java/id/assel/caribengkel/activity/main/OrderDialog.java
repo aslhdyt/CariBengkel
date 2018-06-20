@@ -9,7 +9,6 @@ import android.view.Display;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.TextView;
 
 import id.assel.caribengkel.R;
@@ -19,7 +18,7 @@ public class OrderDialog extends Dialog implements View.OnClickListener {
     private DialogListener listener;
     private TextView progressText;
 
-    public OrderDialog(Activity activity, DialogListener a) {
+    OrderDialog(Activity activity, DialogListener a) {
         super(activity);
         listener = a;
     }
@@ -37,7 +36,7 @@ public class OrderDialog extends Dialog implements View.OnClickListener {
 
 
         WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
+        Display display = wm != null ? wm.getDefaultDisplay() : null;
         DisplayMetrics metrics = new DisplayMetrics();
         display.getMetrics(metrics);
         Double width = metrics.widthPixels*.9;

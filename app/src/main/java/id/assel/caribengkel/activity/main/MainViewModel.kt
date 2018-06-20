@@ -4,6 +4,7 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.location.Location
 import android.os.Handler
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.EventListener
@@ -15,10 +16,9 @@ import java.util.*
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     var workshopLocation = WorkshopListLiveData(getApplication())
-    lateinit var user: FirebaseUser
     var isUserCancelOrder = false
 
-    fun postOrder(user: FirebaseUser, location: Location, callback: OrderCallback) {
+    fun postOrder(location: Location, callback: OrderCallback) {
         isUserCancelOrder = false
 
         val firestore = FirebaseFirestore.getInstance()
@@ -49,12 +49,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     if (iterator.hasNext()) {
                         val value = iterator.next()
 
+                        val user: FirebaseUser = FirebaseAuth.getInstance().currentUser!!
                         val displayName = user.displayName
                         val username: String = if (!displayName.isNullOrEmpty()) displayName!! else user.email ?: ""
                         //create order
                         val order = Order(
                                 uuid = UUID.randomUUID().toString(),
-                                userUuid = this.user.uid,
+                                userUuid = user.uid,
                                 location = GeoPoint(location.latitude, location.longitude),
                                 workshopId = value.id,
                                 username = username

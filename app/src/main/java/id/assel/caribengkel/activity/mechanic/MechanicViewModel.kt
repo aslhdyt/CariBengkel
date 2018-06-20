@@ -39,7 +39,7 @@ class MechanicViewModel(application: Application): AndroidViewModel(application)
     fun rejectJob(order: Order) {
         println("job rejected, user find another mechanic")
         val map = hashMapOf<String, Any?>()
-        map.put("currentOrderUuid", null)
+        map["currentOrderUuid"] = null
         firestore.document("workshop/${order.workshopId}")
                 .update("currentOrderUuid", null)
                 .addOnCompleteListener {

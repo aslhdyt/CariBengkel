@@ -10,7 +10,6 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import com.google.firebase.firestore.FirebaseFirestore
 import id.assel.caribengkel.R
 import id.assel.caribengkel.activity.auth.SplashActivity
@@ -19,7 +18,6 @@ import id.assel.caribengkel.model.OrderLiveData
 import id.assel.caribengkel.model.Workshop
 import id.assel.caribengkel.tools.LoginPref
 import kotlinx.android.synthetic.main.activity_mechanic.*
-import kotlinx.android.synthetic.main.activity_mechanic.view.*
 
 class MechanicActivity : AppCompatActivity() {
     lateinit var viewModel: MechanicViewModel
@@ -76,7 +74,7 @@ class MechanicActivity : AppCompatActivity() {
             finish()
         }
 
-        switchJob.setOnCheckedChangeListener { compoundButton, isChecked ->
+        switchJob.setOnCheckedChangeListener { _, isChecked ->
             viewModel.setActiveWorkshop(isChecked, selectedWorkshop.value)
         }
     }

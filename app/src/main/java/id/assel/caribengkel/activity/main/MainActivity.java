@@ -61,7 +61,6 @@ import java.util.List;
 import id.assel.caribengkel.BuildConfig;
 import id.assel.caribengkel.R;
 import id.assel.caribengkel.activity.auth.SplashActivity;
-import id.assel.caribengkel.model.Order;
 import id.assel.caribengkel.model.Workshop;
 import id.assel.caribengkel.tools.LoginPref;
 import id.assel.caribengkel.tools.Utils;
@@ -93,7 +92,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             finish();
             return;
         }
-        viewModel.setUser(user);
         //drawer item
         System.out.println("photoUrl: " + user.getPhotoUrl());
         final AccountHeader header = new AccountHeaderBuilder()
@@ -210,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         public void onLocationResult(LocationResult locationResult) {
                             if (locationResult != null) {
                                 fusedLocationClient.removeLocationUpdates(this);
-                                viewModel.postOrder(user, locationResult.getLastLocation(), new MainViewModel.OrderCallback() {
+                                viewModel.postOrder(locationResult.getLastLocation(), new MainViewModel.OrderCallback() {
 
                                     @Override
                                     public void onOrderAccepted() {
