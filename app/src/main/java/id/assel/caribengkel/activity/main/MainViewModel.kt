@@ -3,6 +3,7 @@ package id.assel.caribengkel.activity.main
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.location.Location
+import android.os.Handler
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.EventListener
@@ -93,6 +94,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                                         println("listener failed to remove")
                                                     }
                                                 }
+
                                                 registrationListener = firestore.document("order/${order.uuid}")
                                                     .addSnapshotListener (EventListener<DocumentSnapshot> { documentSnapshot, firebaseFirestoreException ->
                                                         println("snapshotListener fired")
@@ -127,6 +129,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                                             requestOrderLoop()
                                                         }
                                                     })
+
+                                                //listen cancellation
+                                                val mHandler= Handler()
+                                                mHandler.post(object: Runnable {
+                                                    override fun run() {
+                                                        if (isUserCancelOrder) {
+                                                            stopListen.run()
+                                                            callback.onCanceled()
+                                                        } else {
+                                                            mHandler.postDelayed(this, 1000)
+                                                        }
+                                                    }
+                                                })
+
                                             }
                                         }
                                     }
