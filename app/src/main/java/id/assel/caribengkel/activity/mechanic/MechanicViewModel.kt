@@ -31,6 +31,7 @@ class MechanicViewModel(application: Application): AndroidViewModel(application)
 
     fun acceptJob(order: Order) {
         println("job accepted, TODO notify user")
+        /*checkOrder*/
         order.status = Order.ORDER_ONGOING
         firestore.document("order/${order.uuid}").set(order)
     }

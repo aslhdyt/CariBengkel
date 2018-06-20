@@ -13,6 +13,17 @@ import id.assel.caribengkel.model.Order;
 public class JobDialog extends Dialog implements View.OnClickListener {
     private JobResponse listener;
     private Order order;
+    private static JobDialog instance;
+
+    public static JobDialog getInstance(@NonNull Context context, Order order, JobResponse listener) {
+        if (instance == null) {
+            instance =  new JobDialog(context, order, listener);
+        }
+        return instance;
+    }
+    public static void destroyInstance() {
+        instance = null;
+    };
 
     public JobDialog(@NonNull Context context, Order order, JobResponse listener) {
         super(context);
@@ -51,6 +62,7 @@ public class JobDialog extends Dialog implements View.OnClickListener {
         }
         dismiss();
     }
+
 
     interface JobResponse {
         void onJobsAccepted(Order order);

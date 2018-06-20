@@ -136,6 +136,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                                     override fun run() {
                                                         if (isUserCancelOrder) {
                                                             stopListen.run()
+                                                            firestore.document("order/${order.uuid}").update("status", Order.ORDER_USER_CANCEL)
                                                             callback.onCanceled()
                                                         } else {
                                                             mHandler.postDelayed(this, 1000)

@@ -93,7 +93,7 @@ class MechanicActivity : AppCompatActivity() {
                 val currentOrder = OrderLiveData(this@MechanicActivity, orderUUID)
                 currentOrder.observe(this, Observer {
                     if (it != null) {
-                        val jobDialog = JobDialog(this@MechanicActivity, it, object : JobDialog.JobResponse {
+                        val jobDialog = JobDialog.getInstance(this@MechanicActivity, it, object : JobDialog.JobResponse {
                             override fun onJobsAccepted(order: Order) {
                                 viewModel.acceptJob(it)
                                 Toast.makeText(this@MechanicActivity, "TODO notify user", Toast.LENGTH_SHORT).show()
@@ -111,6 +111,7 @@ class MechanicActivity : AppCompatActivity() {
                             Order.ORDER_USER_CANCEL, Order.ORDER_MECHANIC_CANCEL -> {
                                 FirebaseFirestore.getInstance().document("workshop/${workshop.id}").update("currentOrderUuid", null)
                                 jobDialog.dismiss()
+                                JobDialog.destroyInstance()
                             }
 
                         }
