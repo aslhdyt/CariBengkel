@@ -25,7 +25,7 @@ public class JobDialog extends Dialog implements View.OnClickListener {
         instance = null;
     };
 
-    public JobDialog(@NonNull Context context, Order order, JobResponse listener) {
+    private JobDialog(@NonNull Context context, Order order, JobResponse listener) {
         super(context);
         this.listener = listener;
         this.order = order;

@@ -19,6 +19,7 @@ import id.assel.caribengkel.model.OrderLiveData
 import id.assel.caribengkel.model.Workshop
 import id.assel.caribengkel.tools.LoginPref
 import kotlinx.android.synthetic.main.activity_mechanic.*
+import kotlinx.android.synthetic.main.activity_mechanic.view.*
 
 class MechanicActivity : AppCompatActivity() {
     lateinit var viewModel: MechanicViewModel
@@ -81,6 +82,8 @@ class MechanicActivity : AppCompatActivity() {
     }
 
     val workshopObserver = Observer<Workshop> { workshop ->
+        cvOrder.visibility = View.GONE
+        switchJob.isEnabled = true
         if (workshop != null) {
             switchJob.isEnabled = true
             switchJob.isChecked = workshop.active
@@ -91,23 +94,40 @@ class MechanicActivity : AppCompatActivity() {
                 //delete last job
 
                 val currentOrder = OrderLiveData(this@MechanicActivity, orderUUID)
-                currentOrder.observe(this, Observer {
-                    if (it != null) {
-                        val jobDialog = JobDialog.getInstance(this@MechanicActivity, it, object : JobDialog.JobResponse {
+                currentOrder.observe(this, Observer {order ->
+                    if (order != null) {
+                        val jobDialog = JobDialog.getInstance(this@MechanicActivity, order, object : JobDialog.JobResponse {
                             override fun onJobsAccepted(order: Order) {
-                                viewModel.acceptJob(it)
-                                Toast.makeText(this@MechanicActivity, "TODO notify user", Toast.LENGTH_SHORT).show()
+                                viewModel.acceptJob(order)
                             }
 
                             override fun onJobsRejected(order: Order) {
-                                viewModel.rejectJob(it)
+                                viewModel.rejectJob(order)
                             }
 
                         })
-                        when (it.status) {
+                        when (order.status) {
                             Order.ORDER_PENDING -> jobDialog.show()
-                            Order.ORDER_ONGOING -> println("TODO show current job")
-                            Order.ORDER_FINISH -> println("TODO clear order related view")
+                            Order.ORDER_ONGOING -> {
+                                jobDialog.dismiss()
+                                JobDialog.destroyInstance()
+
+                                println("TODO show current job")
+                                cvOrder.visibility = View.VISIBLE
+                                tvOrderId.text = "id: ${order.uuid}"
+                                tvClientName.text = order.username
+                                btnFinish.setOnClickListener { viewModel.finishOrder(order) }
+                                //TOdo map preview
+
+                                switchJob.isEnabled = false
+
+                            }
+                            Order.ORDER_FINISH -> {
+                                jobDialog.dismiss()
+                                JobDialog.destroyInstance()
+
+                                FirebaseFirestore.getInstance().document("workshop/${workshop.id}").update("currentOrderUuid", null)
+                            }
                             Order.ORDER_USER_CANCEL, Order.ORDER_MECHANIC_CANCEL -> {
                                 FirebaseFirestore.getInstance().document("workshop/${workshop.id}").update("currentOrderUuid", null)
                                 jobDialog.dismiss()

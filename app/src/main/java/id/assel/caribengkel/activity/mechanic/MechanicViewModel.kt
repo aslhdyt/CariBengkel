@@ -49,4 +49,10 @@ class MechanicViewModel(application: Application): AndroidViewModel(application)
                 }
     }
 
+    fun finishOrder(order: Order) {
+        order.status = Order.ORDER_FINISH
+        order.endAt = System.currentTimeMillis()
+        firestore.document("order/${order.uuid}").set(order)
+    }
+
 }
