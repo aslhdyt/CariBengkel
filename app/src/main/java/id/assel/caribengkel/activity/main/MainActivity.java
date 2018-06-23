@@ -1,7 +1,10 @@
 package id.assel.caribengkel.activity.main;
 
 import android.Manifest;
+import android.arch.core.util.Function;
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.Transformations;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -61,12 +64,17 @@ import java.util.List;
 import id.assel.caribengkel.BuildConfig;
 import id.assel.caribengkel.R;
 import id.assel.caribengkel.activity.auth.SplashActivity;
+import id.assel.caribengkel.model.Order;
+import id.assel.caribengkel.model.OrderByUserLiveData;
+import id.assel.caribengkel.model.OrderLiveData;
 import id.assel.caribengkel.model.Workshop;
+import id.assel.caribengkel.model.WorkshopLiveData;
 import id.assel.caribengkel.tools.LoginPref;
 import id.assel.caribengkel.tools.Utils;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
     MainViewModel viewModel;
+    FirebaseUser user;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setSupportActionBar(toolbar);
 
 
-        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
             Intent intent = new Intent(MainActivity.this, SplashActivity.class);
             startActivity(intent);
@@ -211,9 +219,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 viewModel.postOrder(locationResult.getLastLocation(), new MainViewModel.OrderCallback() {
 
                                     @Override
-                                    public void onOrderAccepted() {
-                                        //TODO create order complete UI
-                                        Toast.makeText(MainActivity.this, "TODO create order complete UI", Toast.LENGTH_SHORT).show();
+                                    public void onOrderAccepted(@org.jetbrains.annotations.NotNull Order order) {
                                         view.setEnabled(true);
                                         orderDialog.dismiss();
                                     }
@@ -258,56 +264,85 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         });
+
     }
 
+
+
+    GoogleMap mMap;
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        final GoogleMap mMap = googleMap;
+        mMap = googleMap;
+        viewModel.getWorkshopLocation().observe(this,listWorkshopObserver);
 
 
-        viewModel.getWorkshopLocation().observe(this, new Observer<List<Workshop>>() {
-            boolean firstInit = true;
+        //listen available order
+        final OrderByUserLiveData listOrder = new OrderByUserLiveData(this, user.getUid());
+        listOrder.observe(this, new Observer<List<? extends Order>>() {
             @Override
-            public void onChanged(@Nullable List<Workshop> workshops) {
-                mMap.clear();
-                if (workshops != null) {
+            public void onChanged(@Nullable List<? extends Order> orders) {
+                //TODO show order history
+            }
+        });
 
-                    //create marker icon
 
-                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                    for (Workshop workshop : workshops) {
-                        BitmapDescriptor markerIcon;
-                        String iconSnippet;
-                        if (workshop.getActive()) {
-                            //larger icon
-                            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_toolbox_circled_round);
-                            int px =  Utils.dpToPx(MainActivity.this, 50);
-                            bitmap = Bitmap.createScaledBitmap(bitmap,px,px, false);
-                            markerIcon = BitmapDescriptorFactory.fromBitmap(bitmap);
-                            iconSnippet = "Operasional";
-                        } else {
-                            //smaller greyscalled icon
-                            Bitmap bitmap = Utils.getBitmapFromVectorDrawable(MainActivity.this, R.drawable.ic_toolbox);
-                            int px =  Utils.dpToPx(MainActivity.this, 20);
-                            bitmap = Bitmap.createScaledBitmap(bitmap,px,px, false);
-                            markerIcon = BitmapDescriptorFactory.fromBitmap(Utils.toGrayscale(bitmap));
-                            iconSnippet = "Tutup";
-                        }
-                        LatLng latLng = new LatLng(workshop.getLatLng().getLatitude(), workshop.getLatLng().getLongitude());
-                        mMap.addMarker(new MarkerOptions().position(latLng).title(workshop.getName()).snippet(iconSnippet).icon(markerIcon));
-
-                        if (firstInit) builder.include(latLng);
-                    }
-
-                    if (firstInit) {
-                        LatLngBounds bounds = builder.build();
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
-                        firstInit = false;
-                    }
+        AlertDialog dialog = new AlertDialog.Builder(this).setCancelable(false)
+                .setMessage("Mekanik sedang munuju ke lokasi anda")
+                .create();
+        LiveData<Order> ongoingOrder = viewModel.onGoingOrder(listOrder);
+        ongoingOrder.observe(this, new Observer<Order>() {
+            @Override
+            public void onChanged(@Nullable Order order) {
+                if (order != null && order.getStatus().equals(Order.ORDER_ONGOING)) {
+                    dialog.show();
+                } else {
+                    dialog.dismiss();
                 }
             }
         });
     }
+    Observer<List<Workshop>> listWorkshopObserver = new Observer<List<Workshop>>() {
+        boolean firstInit = true;
+        @Override
+        public void onChanged(@Nullable List<Workshop> workshops) {
+            mMap.clear();
+            if (workshops != null) {
+
+                //create marker icon
+
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                for (Workshop workshop : workshops) {
+                    BitmapDescriptor markerIcon;
+                    String iconSnippet;
+                    if (workshop.getActive()) {
+                        //larger icon
+                        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_toolbox_circled_round);
+                        int px =  Utils.dpToPx(MainActivity.this, 50);
+                        bitmap = Bitmap.createScaledBitmap(bitmap,px,px, false);
+                        markerIcon = BitmapDescriptorFactory.fromBitmap(bitmap);
+                        iconSnippet = "Operasional";
+                    } else {
+                        //smaller greyscalled icon
+                        Bitmap bitmap = Utils.getBitmapFromVectorDrawable(MainActivity.this, R.drawable.ic_toolbox);
+                        int px =  Utils.dpToPx(MainActivity.this, 20);
+                        bitmap = Bitmap.createScaledBitmap(bitmap,px,px, false);
+                        markerIcon = BitmapDescriptorFactory.fromBitmap(Utils.toGrayscale(bitmap));
+                        iconSnippet = "Tutup";
+                    }
+                    LatLng latLng = new LatLng(workshop.getLatLng().getLatitude(), workshop.getLatLng().getLongitude());
+                    mMap.addMarker(new MarkerOptions().position(latLng).title(workshop.getName()).snippet(iconSnippet).icon(markerIcon));
+
+                    if (firstInit) builder.include(latLng);
+                }
+
+                if (firstInit) {
+                    LatLngBounds bounds = builder.build();
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+                    firstInit = false;
+                }
+            }
+        }
+    };
 
     static int REQUEST_PERMISSIONS_LOCATION = 10;
 

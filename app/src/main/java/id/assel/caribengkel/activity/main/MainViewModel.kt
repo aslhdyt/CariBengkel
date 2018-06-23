@@ -1,7 +1,10 @@
 package id.assel.caribengkel.activity.main
 
 import android.app.Application
+import android.arch.core.util.Function
 import android.arch.lifecycle.AndroidViewModel
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.Transformations
 import android.location.Location
 import android.os.Handler
 import com.google.firebase.auth.FirebaseAuth
@@ -9,6 +12,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.EventListener
 import id.assel.caribengkel.model.Order
+import id.assel.caribengkel.model.OrderByUserLiveData
 import id.assel.caribengkel.model.Workshop
 import id.assel.caribengkel.model.WorkshopListLiveData
 import java.util.*
@@ -16,8 +20,18 @@ import java.util.*
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     var workshopLocation = WorkshopListLiveData(getApplication())
-    var isUserCancelOrder = false
 
+
+
+    fun onGoingOrder(srcLiveData: OrderByUserLiveData): LiveData<Order> {
+        return Transformations.map(srcLiveData, {
+            it.firstOrNull { it.status == Order.ORDER_ONGOING }
+        })
+    }
+
+
+
+    var isUserCancelOrder = false
     fun postOrder(location: Location, callback: OrderCallback) {
         isUserCancelOrder = false
 
@@ -117,7 +131,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                                             when (updatedOrder.status) {
                                                                 Order.ORDER_ONGOING -> {
                                                                     println("order accepted")
-                                                                    callback.onOrderAccepted()
+                                                                    callback.onOrderAccepted(updatedOrder)
                                                                     stopListen.run()
                                                                 }
                                                                 Order.ORDER_MECHANIC_CANCEL -> {
@@ -156,19 +170,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 requestOrderLoop()
             }
-
-
     }
+
 
     fun cancelOrderRequest() {
         isUserCancelOrder = true
     }
 
-
-
     interface OrderCallback {
         fun onCanceled()
-        fun onOrderAccepted()
+        fun onOrderAccepted(updatedOrder: Order)
         fun onProcessingOrder(processMessage: String)
         fun onFailure(exception: Exception)
     }

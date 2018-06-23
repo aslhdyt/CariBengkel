@@ -50,7 +50,7 @@ class MechanicActivity : AppCompatActivity() {
             if (workshops != null) {
                 val sorted = workshops.sortedBy { it.id }
 
-                val adapter = ArrayAdapter(this@MechanicActivity, android.R.layout.simple_spinner_dropdown_item, sorted)
+                val adapter = ArrayAdapter(this@MechanicActivity, R.layout.spinner_item, sorted)
                 spinnerMechanic.adapter = adapter
 
                 spinnerMechanic.visibility = View.VISIBLE

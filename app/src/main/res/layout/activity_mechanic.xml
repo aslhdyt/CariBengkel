@@ -10,12 +10,13 @@
         android:id="@+id/spinnerLayout"
         android:layout_width="match_parent"
         android:layout_height="54dp"
-        android:background="@color/accent"
+        android:background="@color/primary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <Spinner
+            android:backgroundTint="@color/md_white_1000"
             android:id="@+id/spinnerMechanic"
             style="@style/Widget.AppCompat.Spinner"
             android:layout_width="match_parent"
