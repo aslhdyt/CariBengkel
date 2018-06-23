@@ -5,12 +5,14 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.Transformations
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import com.google.firebase.firestore.FirebaseFirestore
+import com.squareup.picasso.Picasso
 import id.assel.caribengkel.R
 import id.assel.caribengkel.activity.auth.SplashActivity
 import id.assel.caribengkel.model.Order
@@ -115,7 +117,22 @@ class MechanicActivity : AppCompatActivity() {
                                 tvOrderId.text = "id: ${order.uuid}"
                                 tvClientName.text = order.username
                                 btnFinish.setOnClickListener { viewModel.finishOrder(order) }
-                                //TOdo map preview
+                                ivLocationMap.setOnClickListener {
+                                    val intent = Intent(android.content.Intent.ACTION_VIEW,
+                                            Uri.parse("http://maps.google.com/maps?" +
+                                                    "saddr=${workshop.latLng.latitude},${workshop.latLng.longitude}&" +
+                                                    "daddr=${order.location.latitude},${order.location.longitude}"))
+                                    startActivity(intent)
+                                }
+                                val locationUrl = "https://maps.googleapis.com/maps/api/staticmap?" +
+                                        "center=${order.location.latitude},${order.location.longitude}&"
+                                        "&zoom=5" +
+                                        "&size=200x200" +
+                                        "&maptype=roadmap" +
+                                        "&key=${R.string.google_maps_key}"
+                                Picasso.get().load(locationUrl).placeholder(android.R.drawable.ic_menu_mapmode).into(ivLocationMap)
+
+                                //TODO set map preview
 
                                 switchJob.isEnabled = false
 
