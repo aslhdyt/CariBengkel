@@ -1,13 +1,11 @@
 package id.assel.caribengkel.activity.main;
 
 import android.Manifest;
-import android.arch.core.util.Function;
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.Transformations;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -43,19 +41,15 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
-import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
-import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -66,9 +60,7 @@ import id.assel.caribengkel.R;
 import id.assel.caribengkel.activity.auth.SplashActivity;
 import id.assel.caribengkel.model.Order;
 import id.assel.caribengkel.model.OrderByUserLiveData;
-import id.assel.caribengkel.model.OrderLiveData;
 import id.assel.caribengkel.model.Workshop;
-import id.assel.caribengkel.model.WorkshopLiveData;
 import id.assel.caribengkel.tools.LoginPref;
 import id.assel.caribengkel.tools.Utils;
 
@@ -81,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        ((TextView)findViewById(R.id.tvVersion)).setText("Versi: "+BuildConfig.VERSION_NAME);
+        ((TextView) findViewById(R.id.tvVersion)).setText("Versi: " + BuildConfig.VERSION_NAME);
 
         viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
 
@@ -128,36 +120,31 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         new DividerDrawerItem(),
                         item4,
                         item5)
-                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-                    @Override
-                    public boolean onItemClick(final View view, int position, IDrawerItem drawerItem) {
-                        if (drawerItem == item1) {
-                            System.out.println("item1 clicked");
-                        } else if (drawerItem == item2) {
-                            System.out.println("item2 clicked");
-                        } else if (drawerItem == item3) {
-                            System.out.println("item3 clicked");
-                        } else if (drawerItem == item4) {
-                            System.out.println("item4 clicked");
-                        } else if (drawerItem == item5) {
-                            AuthUI.getInstance()
-                                    .signOut(MainActivity.this)
-                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            LoginPref.clearAll(view.getContext());
-                                            Intent intent = new Intent(MainActivity.this, SplashActivity.class);
-                                            startActivity(intent);
-                                            finish();
-                                        }
-                                    });
+                .withOnDrawerItemClickListener((view, position, drawerItem) -> {
+                    if (drawerItem == item1) {
+                        System.out.println("item1 clicked");
+                    } else if (drawerItem == item2) {
+                        System.out.println("item2 clicked");
+                    } else if (drawerItem == item3) {
+                        System.out.println("item3 clicked");
+                    } else if (drawerItem == item4) {
+                        System.out.println("item4 clicked");
+                    } else if (drawerItem == item5) {
+                        AuthUI.getInstance()
+                                .signOut(MainActivity.this)
+                                .addOnCompleteListener(task -> {
+                                    LoginPref.clearAll(view.getContext());
+                                    Intent intent = new Intent(MainActivity.this, SplashActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                });
 
-                        } else {
-                            System.out.println("item not registered");
-                        }
-
-
-                        return false;
+                    } else {
+                        System.out.println("item not registered");
                     }
+
+
+                    return false;
                 })
                 .build();
 
@@ -167,32 +154,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(final View view) {
                 //get current location
                 if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+                    LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                     boolean gps_enabled = false;
                     try {
                         gps_enabled = lm != null && lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                    }catch (Exception ignored){}
+                    } catch (Exception ignored) {
+                    }
                     boolean network_enabled = false;
-                    try{
+                    try {
                         network_enabled = lm != null && lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-                    }catch (Exception ignored){}
-                    if(!gps_enabled && !network_enabled){
+                    } catch (Exception ignored) {
+                    }
+                    if (!gps_enabled && !network_enabled) {
                         AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
                         dialog.setMessage(getResources().getString(R.string.gps_network_not_enabled));
-                        dialog.setPositiveButton(getResources().getString(R.string.open_location_settings), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                                Intent myIntent = new Intent( Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                startActivity(myIntent);
-                            }
+                        dialog.setPositiveButton(getResources().getString(R.string.open_location_settings), (paramDialogInterface, paramInt) -> {
+                            Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            startActivity(myIntent);
                         });
-                        dialog.setNegativeButton(getString(R.string.Cancel), new DialogInterface.OnClickListener() {
+                        dialog.setNegativeButton(getString(R.string.Cancel), (paramDialogInterface, paramInt) -> {
+                            // TODO Auto-generated method stub
 
-                            @Override
-                            public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                                // TODO Auto-generated method stub
-
-                            }
                         });
                         dialog.show();
                         return;
@@ -200,12 +182,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
                     view.setEnabled(false);
-                    final OrderDialog orderDialog = new OrderDialog(MainActivity.this, new OrderDialog.DialogListener() {
-                        @Override
-                        public void onCancel() {
-                            viewModel.cancelOrderRequest();
-                        }
-                    });
+                    final OrderDialog orderDialog = new OrderDialog(MainActivity.this, () -> viewModel.cancelOrderRequest());
                     orderDialog.show();
                     orderDialog.progressMessage("mencari lokasi anda.");
 
@@ -223,18 +200,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         view.setEnabled(true);
                                         orderDialog.dismiss();
                                     }
+
                                     @Override
-                                    public void onProcessingOrder(String progressMessage) {
-                                        System.out.println("progress: "+progressMessage);
+                                    public void onProcessingOrder(@NonNull String progressMessage) {
+                                        System.out.println("progress: " + progressMessage);
                                         orderDialog.progressMessage(progressMessage);
                                     }
 
                                     @Override
                                     public void onFailure(@NotNull Exception exception) {
-                                        Toast.makeText(MainActivity.this, "Pesanan gagal\n"+exception.getMessage(), Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(MainActivity.this, "Pesanan gagal\n" + exception.getMessage(), Toast.LENGTH_SHORT).show();
                                         view.setEnabled(true);
                                         orderDialog.dismiss();
                                     }
+
                                     @Override
                                     public void onCanceled() {
                                         view.setEnabled(true);
@@ -245,7 +224,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 System.out.println("no location updates");
                             }
                         }
-
                         @Override
                         public void onLocationAvailability(LocationAvailability locationAvailability) {
                             if (locationAvailability.isLocationAvailable()) {
@@ -268,21 +246,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-
     GoogleMap mMap;
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        viewModel.getWorkshopLocation().observe(this,listWorkshopObserver);
+        viewModel.getWorkshopLocation().observe(this, listWorkshopObserver);
 
 
         //listen available order
         final OrderByUserLiveData listOrder = new OrderByUserLiveData(this, user.getUid());
-        listOrder.observe(this, new Observer<List<? extends Order>>() {
-            @Override
-            public void onChanged(@Nullable List<? extends Order> orders) {
-                //TODO show order history
-            }
+        listOrder.observe(this, orders -> {
+            //TODO show order history
         });
 
 
@@ -290,19 +265,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .setMessage("Mekanik sedang munuju ke lokasi anda")
                 .create();
         LiveData<Order> ongoingOrder = viewModel.onGoingOrder(listOrder);
-        ongoingOrder.observe(this, new Observer<Order>() {
-            @Override
-            public void onChanged(@Nullable Order order) {
-                if (order != null && order.getStatus().equals(Order.ORDER_ONGOING)) {
-                    dialog.show();
-                } else {
-                    dialog.dismiss();
-                }
+        ongoingOrder.observe(this, order -> {
+            if (order != null && order.getStatus().equals(Order.ORDER_ONGOING)) {
+                dialog.show();
+            } else {
+                dialog.dismiss();
             }
         });
+
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            checkLocationPermission();
+        } else {
+            mMap.setMyLocationEnabled(true);
+        }
     }
+
     Observer<List<Workshop>> listWorkshopObserver = new Observer<List<Workshop>>() {
         boolean firstInit = true;
+
         @Override
         public void onChanged(@Nullable List<Workshop> workshops) {
             mMap.clear();
@@ -317,15 +298,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     if (workshop.getActive()) {
                         //larger icon
                         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_toolbox_circled_round);
-                        int px =  Utils.dpToPx(MainActivity.this, 50);
-                        bitmap = Bitmap.createScaledBitmap(bitmap,px,px, false);
+                        int px = Utils.dpToPx(MainActivity.this, 50);
+                        bitmap = Bitmap.createScaledBitmap(bitmap, px, px, false);
                         markerIcon = BitmapDescriptorFactory.fromBitmap(bitmap);
                         iconSnippet = "Operasional";
                     } else {
                         //smaller greyscalled icon
                         Bitmap bitmap = Utils.getBitmapFromVectorDrawable(MainActivity.this, R.drawable.ic_toolbox);
-                        int px =  Utils.dpToPx(MainActivity.this, 20);
-                        bitmap = Bitmap.createScaledBitmap(bitmap,px,px, false);
+                        int px = Utils.dpToPx(MainActivity.this, 20);
+                        bitmap = Bitmap.createScaledBitmap(bitmap, px, px, false);
                         markerIcon = BitmapDescriptorFactory.fromBitmap(Utils.toGrayscale(bitmap));
                         iconSnippet = "Tutup";
                     }
@@ -360,14 +341,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 new AlertDialog.Builder(this)
                         .setTitle("Location Permission Needed")
                         .setMessage("This app needs the Location permission, please accept to use location functionality")
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                //Prompt the user once explanation has been shown
-                                ActivityCompat.requestPermissions(MainActivity.this,
-                                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                        REQUEST_PERMISSIONS_LOCATION );
-                            }
+                        .setPositiveButton("OK", (dialogInterface, i) -> {
+                            //Prompt the user once explanation has been shown
+                            ActivityCompat.requestPermissions(MainActivity.this,
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                    REQUEST_PERMISSIONS_LOCATION);
                         })
                         .create()
                         .show();
@@ -377,11 +355,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        REQUEST_PERMISSIONS_LOCATION );
+                        REQUEST_PERMISSIONS_LOCATION);
             }
         }
     }
 
-
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_PERMISSIONS_LOCATION) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                checkLocationPermission();
+            }
+            mMap.setMyLocationEnabled(true);
+        }
+    }
 }
