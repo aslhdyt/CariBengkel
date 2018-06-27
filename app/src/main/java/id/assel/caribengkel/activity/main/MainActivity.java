@@ -1,9 +1,10 @@
 package id.assel.caribengkel.activity.main;
 
 import android.Manifest;
-import android.app.Activity;
+import android.arch.core.util.Function;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.Transformations;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -43,6 +45,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.GeoPoint;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.DrawerBuilder;
@@ -251,15 +254,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        viewModel.getWorkshopLocation().observe(this, listWorkshopObserver);
 
 
         //listen available order
         final OrderByUserLiveData listOrder = new OrderByUserLiveData(this, user.getUid());
         listOrder.observe(this, orders -> {
+
             //TODO show order history
         });
 
+        Snackbar snackbar = Snackbar.make(findViewById(R.id.map), "Mekanik sedang munuju ke lokasi anda", Snackbar.LENGTH_INDEFINITE);
 
         AlertDialog dialog = new AlertDialog.Builder(this).setCancelable(false)
                 .setMessage("Mekanik sedang munuju ke lokasi anda")
@@ -267,12 +271,58 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         LiveData<Order> ongoingOrder = viewModel.onGoingOrder(listOrder);
         ongoingOrder.observe(this, order -> {
             if (order != null && order.getStatus().equals(Order.ORDER_ONGOING)) {
-                dialog.show();
+                mMap.clear();
+                viewModel.getWorkshopLocation().removeObserver(listWorkshopObserver);
+                findViewById(R.id.buttonFindMechanic).setVisibility(View.INVISIBLE);
+                if (!snackbar.isShown()) snackbar.show();
+//                dialog.show();
             } else {
-                dialog.dismiss();
+                if (!viewModel.getWorkshopLocation().hasActiveObservers()) {
+                    viewModel.getWorkshopLocation().observe(MainActivity.this, listWorkshopObserver);
+                }
+                findViewById(R.id.buttonFindMechanic).setVisibility(View.VISIBLE);
+                if (snackbar.isShown()) snackbar.dismiss();
+//                dialog.dismiss();
+            }
+        });
+        LiveData<GeoPoint> mechanicPosition = Transformations.map(ongoingOrder, new Function<Order, GeoPoint>() {
+            @Override
+            public GeoPoint apply(Order input) {
+                GeoPoint output = null;
+                if (input != null) {
+                    output = input.getMechanicPosition();
+                }
+                return output;
+
             }
         });
 
+
+        mechanicPosition.observe(this, point -> {
+            LatLngBounds.Builder builder = new LatLngBounds.Builder(); //for camera bound
+            Order order = ongoingOrder.getValue();
+            if (order != null) {
+                GeoPoint clientPosition = order.getLocation();
+                LatLng latLng = new LatLng(clientPosition.getLatitude(), clientPosition.getLongitude());
+                mMap.addMarker(new MarkerOptions().position(latLng));
+                builder.include(latLng);
+            }
+            if(point != null) {
+                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_toolbox_circled_round);
+                int px = Utils.dpToPx(MainActivity.this, 50);
+                bitmap = Bitmap.createScaledBitmap(bitmap, px, px, false);
+                BitmapDescriptor markerIcon = BitmapDescriptorFactory.fromBitmap(bitmap);
+                LatLng latLng= new LatLng(point.getLatitude(), point.getLongitude());
+                MarkerOptions marker = new MarkerOptions().position(latLng).icon(markerIcon);
+                mMap.addMarker(marker);
+
+                builder.include(latLng);
+                LatLngBounds bounds = builder.build();
+                mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+            }
+        });
+
+        viewModel.getWorkshopLocation().observe(MainActivity.this, listWorkshopObserver);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             checkLocationPermission();
@@ -283,7 +333,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     Observer<List<Workshop>> listWorkshopObserver = new Observer<List<Workshop>>() {
         boolean firstInit = true;
-
         @Override
         public void onChanged(@Nullable List<Workshop> workshops) {
             mMap.clear();

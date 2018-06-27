@@ -12,6 +12,7 @@ data class Order (
         val location: GeoPoint,
         var status: String = ORDER_PENDING
 ) {
+    var mechanicPosition: GeoPoint? = null
     //empty constructor required for firestore
     constructor(): this("", "","",0, 0L, 0L, GeoPoint(0.0,0.0), "")
     companion object {
