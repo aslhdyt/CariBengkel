@@ -1,12 +1,15 @@
 package id.assel.caribengkel.activity.mechanic
 
+import android.Manifest
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.Transformations
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.AdapterView
@@ -24,7 +27,6 @@ import kotlinx.android.synthetic.main.activity_mechanic.*
 class MechanicActivity : AppCompatActivity() {
     lateinit var viewModel: MechanicViewModel
     lateinit var selectedWorkshop: LiveData<Workshop>
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mechanic)
@@ -48,23 +50,27 @@ class MechanicActivity : AppCompatActivity() {
             }
         }
 
-        viewModel.workshops.observe(this, Observer { workshops ->
-            if (workshops != null) {
-                val sorted = workshops.sortedBy { it.id }
+        viewModel.workshops.observe(this, object : Observer<List<Workshop>> {
+            override fun onChanged(workshops: List<Workshop>?) {
+                if (workshops != null && workshops.isNotEmpty()) {
+                    val sorted = workshops.sortedBy { it.id }
 
-                val adapter = ArrayAdapter(this@MechanicActivity, R.layout.spinner_item, sorted)
-                spinnerMechanic.adapter = adapter
+                    val adapter = ArrayAdapter(this@MechanicActivity, R.layout.spinner_item, sorted)
+                    spinnerMechanic.adapter = adapter
 
-                spinnerMechanic.visibility = View.VISIBLE
-                switchJob.visibility = View.VISIBLE
-                textView2.visibility = View.VISIBLE
-                tvCoordinate.visibility = View.VISIBLE
-                textView3.visibility = View.VISIBLE
+                    spinnerMechanic.visibility = View.VISIBLE
+                    switchJob.visibility = View.VISIBLE
+                    textView2.visibility = View.VISIBLE
+                    tvCoordinate.visibility = View.VISIBLE
+                    textView3.visibility = View.VISIBLE
 
-                viewModel.workshops.removeObservers(this)
-            } else {
-                spinnerMechanic.adapter = null
+                    viewModel.workshops.removeObserver(this)
+                } else {
+                    spinnerMechanic.adapter = null
+                }
+
             }
+
         })
 
 
@@ -98,7 +104,11 @@ class MechanicActivity : AppCompatActivity() {
                     if (order != null) {
                         val jobDialog = JobDialog.getInstance(this@MechanicActivity, order, object : JobDialog.JobResponse {
                             override fun onJobsAccepted(order: Order) {
-                                viewModel.acceptJob(order)
+                                if (ContextCompat.checkSelfPermission(this@MechanicActivity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                                    viewModel.acceptJob(order)
+                                } else {
+                                    viewModel.checkLocationPermission(this@MechanicActivity)
+                                }
                             }
 
                             override fun onJobsRejected(order: Order) {
@@ -109,6 +119,8 @@ class MechanicActivity : AppCompatActivity() {
                         when (order.status) {
                             Order.ORDER_PENDING -> jobDialog.show()
                             Order.ORDER_ONGOING -> {
+                                switchJob.isEnabled = false
+
                                 jobDialog.dismiss()
                                 JobDialog.destroyInstance()
 
@@ -130,12 +142,10 @@ class MechanicActivity : AppCompatActivity() {
                                         "&size=200x200" +
                                         "&maptype=roadmap" +
                                         "&key=${R.string.google_maps_key}"
+                                //TODO set map preview
                                 Picasso.get().load(locationUrl).placeholder(android.R.drawable.ic_menu_mapmode).into(ivLocationMap)
 
-                                //TODO set map preview
-
-                                switchJob.isEnabled = false
-
+                                viewModel.updatesMechanicPosition(this, orderUUID)
                             }
                             Order.ORDER_FINISH -> {
                                 jobDialog.dismiss()
@@ -155,7 +165,6 @@ class MechanicActivity : AppCompatActivity() {
                     }
                 })
             }
-
         } else {
             switchJob.isChecked = false
             switchJob.isEnabled = false
