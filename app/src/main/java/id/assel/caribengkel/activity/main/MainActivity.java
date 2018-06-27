@@ -264,10 +264,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         Snackbar snackbar = Snackbar.make(findViewById(R.id.map), "Mekanik sedang munuju ke lokasi anda", Snackbar.LENGTH_INDEFINITE);
-
-        AlertDialog dialog = new AlertDialog.Builder(this).setCancelable(false)
-                .setMessage("Mekanik sedang munuju ke lokasi anda")
-                .create();
         LiveData<Order> ongoingOrder = viewModel.onGoingOrder(listOrder);
         ongoingOrder.observe(this, order -> {
             if (order != null && order.getStatus().equals(Order.ORDER_ONGOING)) {
@@ -275,14 +271,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 viewModel.getWorkshopLocation().removeObserver(listWorkshopObserver);
                 findViewById(R.id.buttonFindMechanic).setVisibility(View.INVISIBLE);
                 if (!snackbar.isShown()) snackbar.show();
-//                dialog.show();
             } else {
                 if (!viewModel.getWorkshopLocation().hasActiveObservers()) {
                     viewModel.getWorkshopLocation().observe(MainActivity.this, listWorkshopObserver);
                 }
                 findViewById(R.id.buttonFindMechanic).setVisibility(View.VISIBLE);
                 if (snackbar.isShown()) snackbar.dismiss();
-//                dialog.dismiss();
             }
         });
         LiveData<GeoPoint> mechanicPosition = Transformations.map(ongoingOrder, new Function<Order, GeoPoint>() {
@@ -318,7 +312,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 builder.include(latLng);
                 LatLngBounds bounds = builder.build();
-                mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
             }
         });
 
