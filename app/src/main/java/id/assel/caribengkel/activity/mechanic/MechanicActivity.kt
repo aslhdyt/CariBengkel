@@ -128,22 +128,23 @@ class MechanicActivity : AppCompatActivity() {
                                 cvOrder.visibility = View.VISIBLE
                                 tvOrderId.text = "id: ${order.uuid}"
                                 tvClientName.text = order.username
+                                tvTargeLocation.text = "${order.location.latitude}\n${order.location.longitude}"
                                 btnFinish.setOnClickListener { viewModel.finishOrder(order) }
-                                ivLocationMap.setOnClickListener {
+                                btnMap.setOnClickListener {
                                     val intent = Intent(android.content.Intent.ACTION_VIEW,
                                             Uri.parse("http://maps.google.com/maps?" +
                                                     "saddr=${workshop.latLng.latitude},${workshop.latLng.longitude}&" +
                                                     "daddr=${order.location.latitude},${order.location.longitude}"))
                                     startActivity(intent)
                                 }
-                                val locationUrl = "https://maps.googleapis.com/maps/api/staticmap?" +
-                                        "center=${order.location.latitude},${order.location.longitude}&"
-                                        "&zoom=5" +
-                                        "&size=200x200" +
-                                        "&maptype=roadmap" +
-                                        "&key=${R.string.google_maps_key}"
-                                //TODO set map preview
-                                Picasso.get().load(locationUrl).placeholder(android.R.drawable.ic_menu_mapmode).into(ivLocationMap)
+//                                val locationUrl = "https://maps.googleapis.com/maps/api/staticmap?" +
+//                                        "center=${order.location.latitude},${order.location.longitude}&"
+//                                        "&zoom=5" +
+//                                        "&size=200x200" +
+//                                        "&maptype=roadmap" +
+//                                        "&key=${R.string.google_maps_key}"
+//                                //TODO set map preview
+//                                Picasso.get().load(locationUrl).placeholder(android.R.drawable.ic_menu_mapmode).into(ivLocationMap)
 
                                 viewModel.updatesMechanicPosition(this, orderUUID)
                             }
