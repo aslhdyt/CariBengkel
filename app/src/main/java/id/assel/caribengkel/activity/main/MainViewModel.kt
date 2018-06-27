@@ -1,7 +1,6 @@
 package id.assel.caribengkel.activity.main
 
 import android.app.Application
-import android.arch.core.util.Function
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Transformations
@@ -9,8 +8,11 @@ import android.location.Location
 import android.os.Handler
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.*
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.ListenerRegistration
 import id.assel.caribengkel.model.Order
 import id.assel.caribengkel.model.OrderByUserLiveData
 import id.assel.caribengkel.model.Workshop
@@ -21,12 +23,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     var workshopLocation = WorkshopListLiveData(getApplication())
 
+    lateinit var listOrder: OrderByUserLiveData
+    fun initUser(user : FirebaseUser) {
+        listOrder = OrderByUserLiveData(getApplication(), user.uid)
+    }
 
 
     fun onGoingOrder(srcLiveData: OrderByUserLiveData): LiveData<Order> {
-        return Transformations.map(srcLiveData, {
+        return Transformations.map(srcLiveData) {
             it.firstOrNull { it.status == Order.ORDER_ONGOING }
-        })
+        }
     }
 
 
@@ -172,6 +178,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
     }
 
+    fun filteredListOrder(): List<Order> {
+        val orderList = listOrder.value
+        return orderList?.filter { it.status == Order.ORDER_FINISH } ?: listOf()
+    }
 
     fun cancelOrderRequest() {
         isUserCancelOrder = true

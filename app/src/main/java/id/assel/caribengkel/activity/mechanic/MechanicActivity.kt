@@ -126,7 +126,7 @@ class MechanicActivity : AppCompatActivity() {
 
                                 println("TODO show current job")
                                 cvOrder.visibility = View.VISIBLE
-                                tvOrderId.text = "id: ${order.uuid}"
+                                tvOrderId.text = "id: ${order.uuid.takeLast(10)}"
                                 tvClientName.text = order.username
                                 tvTargeLocation.text = "${order.location.latitude}\n${order.location.longitude}"
                                 btnFinish.setOnClickListener { viewModel.finishOrder(order) }

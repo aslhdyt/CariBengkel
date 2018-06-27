@@ -22,7 +22,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -62,7 +65,6 @@ import id.assel.caribengkel.BuildConfig;
 import id.assel.caribengkel.R;
 import id.assel.caribengkel.activity.auth.SplashActivity;
 import id.assel.caribengkel.model.Order;
-import id.assel.caribengkel.model.OrderByUserLiveData;
 import id.assel.caribengkel.model.Workshop;
 import id.assel.caribengkel.tools.LoginPref;
 import id.assel.caribengkel.tools.Utils;
@@ -95,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             finish();
             return;
         }
+        viewModel.initUser(user);
         //drawer item
         System.out.println("photoUrl: " + user.getPhotoUrl());
         final AccountHeader header = new AccountHeaderBuilder()
@@ -129,9 +132,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     } else if (drawerItem == item2) {
                         System.out.println("item2 clicked");
                     } else if (drawerItem == item3) {
-                        System.out.println("item3 clicked");
+                        List<Order> listOrder = viewModel.filteredListOrder();
+                        if (listOrder.size() == 0) {
+                            Toast.makeText(this,"Tidak ada riwayat", Toast.LENGTH_SHORT).show();
+                        } else {
+                            AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+                            LayoutInflater inflater = getLayoutInflater();
+                            View convertView = inflater.inflate(R.layout.dialog_order_history, null);
+                            RecyclerView recyclerView = convertView.findViewById(R.id.recyclerView);
+                            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+                            recyclerView.setAdapter(new OrderHistoryAdapter(listOrder));
+
+                            alertDialog.setView(convertView);
+                            alertDialog.setTitle("Riwayat pesanan");
+                            alertDialog.show();
+                        }
                     } else if (drawerItem == item4) {
-                        System.out.println("item4 clicked");
+                        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                        builder.setTitle("Bantuan");
+                        builder.setMessage("Hubungi +62 896-0399-2906 via WhatsApp/SMS\nuntuk bantuan lebih lanjut...");
+                        builder.setPositiveButton("OK", (dialogInterface, i) -> dialogInterface.dismiss());
+                        builder.create().show();
                     } else if (drawerItem == item5) {
                         AuthUI.getInstance()
                                 .signOut(MainActivity.this)
@@ -233,6 +254,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 System.out.println("location available");
                             } else {
                                 fusedLocationClient.removeLocationUpdates(this);
+                                checkLocationPermission();
                                 Toast.makeText(MainActivity.this, "layanan lokasi tidak tersedia", Toast.LENGTH_SHORT).show();
                                 view.setEnabled(true);
                             }
@@ -257,14 +279,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
         //listen available order
-        final OrderByUserLiveData listOrder = new OrderByUserLiveData(this, user.getUid());
-        listOrder.observe(this, orders -> {
-
-            //TODO show order history
-        });
 
         Snackbar snackbar = Snackbar.make(findViewById(R.id.map), "Mekanik sedang munuju ke lokasi anda", Snackbar.LENGTH_INDEFINITE);
-        LiveData<Order> ongoingOrder = viewModel.onGoingOrder(listOrder);
+        LiveData<Order> ongoingOrder = viewModel.onGoingOrder(viewModel.listOrder);
         ongoingOrder.observe(this, order -> {
             if (order != null && order.getStatus().equals(Order.ORDER_ONGOING)) {
                 mMap.clear();
