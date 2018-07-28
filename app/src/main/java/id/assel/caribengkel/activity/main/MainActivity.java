@@ -26,6 +26,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,8 +47,11 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -176,101 +180,99 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .build();
 
 
-        findViewById(R.id.buttonFindMechanic).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View view) {
-                //get current location
-                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                    boolean gps_enabled = false;
-                    try {
-                        gps_enabled = lm != null && lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                    } catch (Exception ignored) {
-                    }
-                    boolean network_enabled = false;
-                    try {
-                        network_enabled = lm != null && lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-                    } catch (Exception ignored) {
-                    }
-                    if (!gps_enabled && !network_enabled) {
-                        AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
-                        dialog.setMessage(getResources().getString(R.string.gps_network_not_enabled));
-                        dialog.setPositiveButton(getResources().getString(R.string.open_location_settings), (paramDialogInterface, paramInt) -> {
-                            Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                            startActivity(myIntent);
-                        });
-                        dialog.setNegativeButton(getString(R.string.Cancel), (paramDialogInterface, paramInt) -> {
-                            // TODO Auto-generated method stub
+        findViewById(R.id.buttonFindMechanic).setOnClickListener(this::findMechanic);
 
-                        });
-                        dialog.show();
-                        return;
-                    }
+    }
 
-
-                    view.setEnabled(false);
-                    final OrderDialog orderDialog = new OrderDialog(MainActivity.this, () -> viewModel.cancelOrderRequest());
-                    orderDialog.show();
-                    orderDialog.progressMessage("mencari lokasi anda.");
-
-                    LocationRequest locationRequest = new LocationRequest().setFastestInterval(2000L).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(4000L);
-                    final FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(MainActivity.this);
-                    fusedLocationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
-                        @Override
-                        public void onLocationResult(LocationResult locationResult) {
-                            if (locationResult != null) {
-                                fusedLocationClient.removeLocationUpdates(this);
-                                viewModel.postOrder(locationResult.getLastLocation(), new MainViewModel.OrderCallback() {
-
-                                    @Override
-                                    public void onOrderAccepted(@org.jetbrains.annotations.NotNull Order order) {
-                                        view.setEnabled(true);
-                                        orderDialog.dismiss();
-                                    }
-
-                                    @Override
-                                    public void onProcessingOrder(@NonNull String progressMessage) {
-                                        System.out.println("progress: " + progressMessage);
-                                        orderDialog.progressMessage(progressMessage);
-                                    }
-
-                                    @Override
-                                    public void onFailure(@NotNull Exception exception) {
-                                        Toast.makeText(MainActivity.this, "Pesanan gagal\n" + exception.getMessage(), Toast.LENGTH_SHORT).show();
-                                        view.setEnabled(true);
-                                        orderDialog.dismiss();
-                                    }
-
-                                    @Override
-                                    public void onCanceled() {
-                                        view.setEnabled(true);
-                                        //user cancel rquest, nothing todo
-                                    }
-                                });
-                            } else {
-                                System.out.println("no location updates");
-                            }
-                        }
-                        @Override
-                        public void onLocationAvailability(LocationAvailability locationAvailability) {
-                            if (locationAvailability.isLocationAvailable()) {
-                                System.out.println("location available");
-                            } else {
-                                fusedLocationClient.removeLocationUpdates(this);
-                                checkLocationPermission();
-                                Toast.makeText(MainActivity.this, "layanan lokasi tidak tersedia", Toast.LENGTH_SHORT).show();
-                                view.setEnabled(true);
-                            }
-                            super.onLocationAvailability(locationAvailability);
-                        }
-                    }, Looper.myLooper());
-                } else {
-                    checkLocationPermission();
-                }
-
+    private void findMechanic(View view) {
+        //get current location
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            boolean gps_enabled = false;
+            try {
+                gps_enabled = lm != null && lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            } catch (Exception ignored) {
             }
-        });
+            boolean network_enabled = false;
+            try {
+                network_enabled = lm != null && lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+            } catch (Exception ignored) {
+            }
+            if (!gps_enabled && !network_enabled) {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+                dialog.setMessage(getResources().getString(R.string.gps_network_not_enabled));
+                dialog.setPositiveButton(getResources().getString(R.string.open_location_settings), (paramDialogInterface, paramInt) -> {
+                    Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(myIntent);
+                });
+                dialog.setNegativeButton(getString(R.string.Cancel), (paramDialogInterface, paramInt) -> {
+                    // TODO Auto-generated method stub
 
+                });
+                dialog.show();
+                return;
+            }
+
+
+            view.setEnabled(false);
+            final OrderDialog orderDialog = new OrderDialog(MainActivity.this, () -> viewModel.cancelOrderRequest());
+            orderDialog.show();
+            orderDialog.progressMessage("mencari lokasi anda.");
+
+            LocationRequest locationRequest = new LocationRequest().setFastestInterval(2000L).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(4000L);
+            final FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(MainActivity.this);
+            fusedLocationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    if (locationResult != null) {
+                        fusedLocationClient.removeLocationUpdates(this);
+                        viewModel.postOrder(locationResult.getLastLocation(), new MainViewModel.OrderCallback() {
+
+                            @Override
+                            public void onOrderAccepted(@org.jetbrains.annotations.NotNull Order order) {
+                                view.setEnabled(true);
+                                orderDialog.dismiss();
+                            }
+
+                            @Override
+                            public void onProcessingOrder(@NonNull String progressMessage) {
+                                System.out.println("progress: " + progressMessage);
+                                orderDialog.progressMessage(progressMessage);
+                            }
+
+                            @Override
+                            public void onFailure(@NotNull Exception exception) {
+                                Toast.makeText(MainActivity.this, "Pesanan gagal\n" + exception.getMessage(), Toast.LENGTH_SHORT).show();
+                                view.setEnabled(true);
+                                orderDialog.dismiss();
+                            }
+
+                            @Override
+                            public void onCanceled() {
+                                view.setEnabled(true);
+                                //user cancel rquest, nothing todo
+                            }
+                        });
+                    } else {
+                        System.out.println("no location updates");
+                    }
+                }
+                @Override
+                public void onLocationAvailability(LocationAvailability locationAvailability) {
+                    if (locationAvailability.isLocationAvailable()) {
+                        System.out.println("location available");
+                    } else {
+                        fusedLocationClient.removeLocationUpdates(this);
+                        checkLocationPermission();
+                        Toast.makeText(MainActivity.this, "layanan lokasi tidak tersedia", Toast.LENGTH_SHORT).show();
+                        view.setEnabled(true);
+                    }
+                    super.onLocationAvailability(locationAvailability);
+                }
+            }, Looper.myLooper());
+        } else {
+            checkLocationPermission();
+        }
     }
 
 
@@ -294,16 +296,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }else return null;
         });
         ongoingOrder.observe(this, order -> {
+            Button mainBtn = findViewById(R.id.buttonFindMechanic);
             if (order != null && order.getStatus().equals(Order.ORDER_ONGOING)) {
                 mMap.clear();
                 viewModel.getWorkshopLocation().removeObserver(listWorkshopObserver);
-                findViewById(R.id.buttonFindMechanic).setVisibility(View.INVISIBLE);
+//                mainBtn.setVisibility(View.INVISIBLE);
+                mainBtn.setText("Batal");
+                mainBtn.setOnClickListener(view -> cancelOrder(view, order.getUuid()));
                 if (!snackbar.isShown()) snackbar.show();
             } else {
                 if (!viewModel.getWorkshopLocation().hasActiveObservers()) {
                     viewModel.getWorkshopLocation().observe(MainActivity.this, listWorkshopObserver);
                 }
-                findViewById(R.id.buttonFindMechanic).setVisibility(View.VISIBLE);
+//                findViewById(R.id.buttonFindMechanic).setVisibility(View.VISIBLE);
+                mainBtn.setText("CARI MEKANIK");
+                mainBtn.setOnClickListener(this::findMechanic);
                 if (snackbar.isShown()) snackbar.dismiss();
                 findViewById(R.id.lytProfile).setVisibility(View.GONE);
             }
@@ -325,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 ((TextView) findViewById(R.id.tvName)).setText(profile.getName());
                 ((TextView) findViewById(R.id.tvAddress)).setText(profile.getAddress());
                 ((TextView) findViewById(R.id.tvPhone)).setText(profile.getPhoneNumber());
-                Picasso.get().load(profile.getPhotoUrl()).into((ImageView)findViewById(R.id.ivProfilePict));
+                Picasso.get().load(profile.getPhotoUrl()).placeholder(R.drawable.ic_person_black_24dp).error(R.drawable.ic_person_black_24dp).into((ImageView)findViewById(R.id.ivProfilePict));
             } else {
                 findViewById(R.id.lytProfile).setVisibility(View.GONE);
             }
@@ -363,6 +370,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else {
             mMap.setMyLocationEnabled(true);
         }
+    }
+
+    private void cancelOrder(View view, String orderUuid) {
+        view.setEnabled(false);
+        FirebaseFirestore.getInstance().document("order/"+orderUuid).update("status", Order.ORDER_USER_CANCEL).addOnCompleteListener(task -> view.setEnabled(true));
     }
 
     Observer<List<Workshop>> listWorkshopObserver = new Observer<List<Workshop>>() {
