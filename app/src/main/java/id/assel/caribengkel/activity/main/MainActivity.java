@@ -1,7 +1,6 @@
 package id.assel.caribengkel.activity.main;
 
 import android.Manifest;
-import android.arch.core.util.Function;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.Transformations;
@@ -27,6 +26,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,6 +56,7 @@ import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -65,7 +66,9 @@ import id.assel.caribengkel.BuildConfig;
 import id.assel.caribengkel.R;
 import id.assel.caribengkel.activity.auth.SplashActivity;
 import id.assel.caribengkel.model.Order;
+import id.assel.caribengkel.model.Profile;
 import id.assel.caribengkel.model.Workshop;
+import id.assel.caribengkel.model.WorkshopLiveData;
 import id.assel.caribengkel.tools.LoginPref;
 import id.assel.caribengkel.tools.Utils;
 
@@ -282,6 +285,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         Snackbar snackbar = Snackbar.make(findViewById(R.id.map), "Mekanik sedang munuju ke lokasi anda", Snackbar.LENGTH_INDEFINITE);
         LiveData<Order> ongoingOrder = viewModel.onGoingOrder(viewModel.listOrder);
+        LiveData<Workshop> currentWorkshop = Transformations.switchMap(ongoingOrder, input -> {
+            if (input!=null) {
+                Integer id = input.getWorkshopId();
+                if (id != null) {
+                    return new WorkshopLiveData(MainActivity.this, id);
+                } else return null;
+            }else return null;
+        });
         ongoingOrder.observe(this, order -> {
             if (order != null && order.getStatus().equals(Order.ORDER_ONGOING)) {
                 mMap.clear();
@@ -294,17 +305,29 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
                 findViewById(R.id.buttonFindMechanic).setVisibility(View.VISIBLE);
                 if (snackbar.isShown()) snackbar.dismiss();
+                findViewById(R.id.lytProfile).setVisibility(View.GONE);
             }
         });
-        LiveData<GeoPoint> mechanicPosition = Transformations.map(ongoingOrder, new Function<Order, GeoPoint>() {
-            @Override
-            public GeoPoint apply(Order input) {
-                GeoPoint output = null;
-                if (input != null) {
-                    output = input.getMechanicPosition();
-                }
-                return output;
+        LiveData<GeoPoint> mechanicPosition = Transformations.map(ongoingOrder, input -> {
+            GeoPoint output = null;
+            if (input != null) {
+                output = input.getMechanicPosition();
+            }
+            return output;
 
+        });
+
+
+        currentWorkshop.observe(this, workshop -> {
+            if (workshop != null && workshop.getProfile() != null) {
+                Profile profile = workshop.getProfile();
+                findViewById(R.id.lytProfile).setVisibility(View.VISIBLE);
+                ((TextView) findViewById(R.id.tvName)).setText(profile.getName());
+                ((TextView) findViewById(R.id.tvAddress)).setText(profile.getAddress());
+                ((TextView) findViewById(R.id.tvPhone)).setText(profile.getPhoneNumber());
+                Picasso.get().load(profile.getPhotoUrl()).into((ImageView)findViewById(R.id.ivProfilePict));
+            } else {
+                findViewById(R.id.lytProfile).setVisibility(View.GONE);
             }
         });
 
