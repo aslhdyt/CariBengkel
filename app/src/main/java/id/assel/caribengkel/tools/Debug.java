@@ -9,7 +9,9 @@ import com.google.firebase.firestore.GeoPoint;
 import java.util.ArrayList;
 import java.util.List;
 
+import id.assel.caribengkel.model.Profile;
 import id.assel.caribengkel.model.Workshop;
+import kotlin.Pair;
 
 public class Debug {
 
@@ -43,6 +45,22 @@ public class Debug {
             final int finalI = i;
 
             Workshop data = new Workshop();
+
+            if (finalI ==1 ) data.setProfile(
+                    new Profile(
+                            "Herman Susanto",
+                            "Jl. Raya Perjuangan No.75, Marga Mulya, Bekasi Utara, Kota Bks, Jawa Barat 17142",
+                            "083990227778"
+                    )
+            );
+            if (finalI == 2 ) data.setProfile(
+                    new Profile(
+                            "Rahman Hidayat",
+                            "Jalan Perjuangan nomor 54 B Kelurahan Marga MuliaPerempatan Teluk Buyung, Marga Mulya, Bekasi Utara, Jawa Barat 17142",
+                            "081088772223"
+                    )
+            );
+
             data.setLatLng(point);
             data.setId(finalI);
             data.setName("Bengkel "+finalI);

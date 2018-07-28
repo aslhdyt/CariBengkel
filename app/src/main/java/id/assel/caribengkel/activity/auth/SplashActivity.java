@@ -45,7 +45,7 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
 //        only for populate data to firestore
-//        Debug.debugSetLocation(this);
+        Debug.debugSetLocation(this);
 
         //todo create mechanic and user dialog
 
